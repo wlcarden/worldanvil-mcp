@@ -933,7 +933,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case 'worldanvil_create_article': {
         const data = {
           title: args.title,
-          world_id: args.world_id,
+          world: args.world_id,  // WorldAnvil API expects 'world' not 'world_id'
         };
         if (args.template !== undefined) data.template = args.template;
         if (args.content !== undefined) data.content = args.content;
@@ -980,7 +980,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case 'worldanvil_create_category': {
         const data = {
           title: args.title,
-          world_id: args.world_id,
+          world: args.world_id,  // WorldAnvil API expects 'world' not 'world_id'
         };
         const result = await client.createCategory(data);
         return {
@@ -1065,56 +1065,56 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       // NOTEBOOKS
       case 'worldanvil_get_notebook': return { content: [{ type: 'text', text: JSON.stringify(await client.getNotebook(args.notebook_id), null, 2) }] };
       case 'worldanvil_list_notebooks': return { content: [{ type: 'text', text: JSON.stringify(await client.listNotebooks(args.world_id, { offset: args.offset, limit: args.limit }), null, 2) }] };
-      case 'worldanvil_create_notebook': return { content: [{ type: 'text', text: JSON.stringify(await client.createNotebook({ title: args.title, world_id: args.world_id }), null, 2) }] };
+      case 'worldanvil_create_notebook': return { content: [{ type: 'text', text: JSON.stringify(await client.createNotebook({ title: args.title, world: args.world_id }), null, 2) }] };
       case 'worldanvil_update_notebook': return { content: [{ type: 'text', text: JSON.stringify(await client.updateNotebook(args.notebook_id, { title: args.title }), null, 2) }] };
       case 'worldanvil_delete_notebook': return { content: [{ type: 'text', text: JSON.stringify(await client.deleteNotebook(args.notebook_id), null, 2) }] };
 
       // NOTE SECTIONS
       case 'worldanvil_get_notesection': return { content: [{ type: 'text', text: JSON.stringify(await client.getNotesection(args.notesection_id), null, 2) }] };
       case 'worldanvil_list_notesections': return { content: [{ type: 'text', text: JSON.stringify(await client.listNotesections(args.notebook_id, { offset: args.offset, limit: args.limit }), null, 2) }] };
-      case 'worldanvil_create_notesection': return { content: [{ type: 'text', text: JSON.stringify(await client.createNotesection({ title: args.title, notebook_id: args.notebook_id }), null, 2) }] };
+      case 'worldanvil_create_notesection': return { content: [{ type: 'text', text: JSON.stringify(await client.createNotesection({ title: args.title, notebook: args.notebook_id }), null, 2) }] };
       case 'worldanvil_update_notesection': return { content: [{ type: 'text', text: JSON.stringify(await client.updateNotesection(args.notesection_id, { title: args.title }), null, 2) }] };
       case 'worldanvil_delete_notesection': return { content: [{ type: 'text', text: JSON.stringify(await client.deleteNotesection(args.notesection_id), null, 2) }] };
 
       // NOTES
       case 'worldanvil_get_note': return { content: [{ type: 'text', text: JSON.stringify(await client.getNote(args.note_id), null, 2) }] };
       case 'worldanvil_list_notes': return { content: [{ type: 'text', text: JSON.stringify(await client.listNotes(args.notesection_id, { offset: args.offset, limit: args.limit }), null, 2) }] };
-      case 'worldanvil_create_note': return { content: [{ type: 'text', text: JSON.stringify(await client.createNote({ title: args.title, notesection_id: args.notesection_id, content: args.content }), null, 2) }] };
+      case 'worldanvil_create_note': return { content: [{ type: 'text', text: JSON.stringify(await client.createNote({ title: args.title, notesection: args.notesection_id, content: args.content }), null, 2) }] };
       case 'worldanvil_update_note': return { content: [{ type: 'text', text: JSON.stringify(await client.updateNote(args.note_id, { title: args.title, content: args.content }), null, 2) }] };
       case 'worldanvil_delete_note': return { content: [{ type: 'text', text: JSON.stringify(await client.deleteNote(args.note_id), null, 2) }] };
 
       // SECRETS
       case 'worldanvil_get_secret': return { content: [{ type: 'text', text: JSON.stringify(await client.getSecret(args.secret_id), null, 2) }] };
       case 'worldanvil_list_secrets': return { content: [{ type: 'text', text: JSON.stringify(await client.listSecrets(args.world_id, { offset: args.offset, limit: args.limit }), null, 2) }] };
-      case 'worldanvil_create_secret': return { content: [{ type: 'text', text: JSON.stringify(await client.createSecret({ title: args.title, world_id: args.world_id, content: args.content }), null, 2) }] };
+      case 'worldanvil_create_secret': return { content: [{ type: 'text', text: JSON.stringify(await client.createSecret({ title: args.title, world: args.world_id, content: args.content }), null, 2) }] };
       case 'worldanvil_update_secret': return { content: [{ type: 'text', text: JSON.stringify(await client.updateSecret(args.secret_id, { title: args.title, content: args.content }), null, 2) }] };
       case 'worldanvil_delete_secret': return { content: [{ type: 'text', text: JSON.stringify(await client.deleteSecret(args.secret_id), null, 2) }] };
 
       // MAPS
       case 'worldanvil_get_map': return { content: [{ type: 'text', text: JSON.stringify(await client.getMap(args.map_id), null, 2) }] };
       case 'worldanvil_list_maps': return { content: [{ type: 'text', text: JSON.stringify(await client.listMaps(args.world_id, { offset: args.offset, limit: args.limit }), null, 2) }] };
-      case 'worldanvil_create_map': return { content: [{ type: 'text', text: JSON.stringify(await client.createMap({ title: args.title, world_id: args.world_id }), null, 2) }] };
+      case 'worldanvil_create_map': return { content: [{ type: 'text', text: JSON.stringify(await client.createMap({ title: args.title, world: args.world_id }), null, 2) }] };
       case 'worldanvil_update_map': return { content: [{ type: 'text', text: JSON.stringify(await client.updateMap(args.map_id, { title: args.title }), null, 2) }] };
       case 'worldanvil_delete_map': return { content: [{ type: 'text', text: JSON.stringify(await client.deleteMap(args.map_id), null, 2) }] };
 
       // MAP MARKERS
       case 'worldanvil_get_marker': return { content: [{ type: 'text', text: JSON.stringify(await client.getMarker(args.marker_id), null, 2) }] };
       case 'worldanvil_list_markers': return { content: [{ type: 'text', text: JSON.stringify(await client.listMarkers(args.map_id, { offset: args.offset, limit: args.limit }), null, 2) }] };
-      case 'worldanvil_create_marker': return { content: [{ type: 'text', text: JSON.stringify(await client.createMarker({ title: args.title, map_id: args.map_id }), null, 2) }] };
+      case 'worldanvil_create_marker': return { content: [{ type: 'text', text: JSON.stringify(await client.createMarker({ title: args.title, map: args.map_id }), null, 2) }] };
       case 'worldanvil_update_marker': return { content: [{ type: 'text', text: JSON.stringify(await client.updateMarker(args.marker_id, { title: args.title }), null, 2) }] };
       case 'worldanvil_delete_marker': return { content: [{ type: 'text', text: JSON.stringify(await client.deleteMarker(args.marker_id), null, 2) }] };
 
       // TIMELINES
       case 'worldanvil_get_timeline': return { content: [{ type: 'text', text: JSON.stringify(await client.getTimeline(args.timeline_id), null, 2) }] };
       case 'worldanvil_list_timelines': return { content: [{ type: 'text', text: JSON.stringify(await client.listTimelines(args.world_id, { offset: args.offset, limit: args.limit }), null, 2) }] };
-      case 'worldanvil_create_timeline': return { content: [{ type: 'text', text: JSON.stringify(await client.createTimeline({ title: args.title, world_id: args.world_id }), null, 2) }] };
+      case 'worldanvil_create_timeline': return { content: [{ type: 'text', text: JSON.stringify(await client.createTimeline({ title: args.title, world: args.world_id }), null, 2) }] };
       case 'worldanvil_update_timeline': return { content: [{ type: 'text', text: JSON.stringify(await client.updateTimeline(args.timeline_id, { title: args.title }), null, 2) }] };
       case 'worldanvil_delete_timeline': return { content: [{ type: 'text', text: JSON.stringify(await client.deleteTimeline(args.timeline_id), null, 2) }] };
 
       // HISTORY EVENTS
       case 'worldanvil_get_history': return { content: [{ type: 'text', text: JSON.stringify(await client.getHistory(args.history_id), null, 2) }] };
       case 'worldanvil_list_histories': return { content: [{ type: 'text', text: JSON.stringify(await client.listHistories(args.world_id, { offset: args.offset, limit: args.limit }), null, 2) }] };
-      case 'worldanvil_create_history': return { content: [{ type: 'text', text: JSON.stringify(await client.createHistory({ title: args.title, world_id: args.world_id, content: args.content }), null, 2) }] };
+      case 'worldanvil_create_history': return { content: [{ type: 'text', text: JSON.stringify(await client.createHistory({ title: args.title, world: args.world_id, content: args.content }), null, 2) }] };
       case 'worldanvil_update_history': return { content: [{ type: 'text', text: JSON.stringify(await client.updateHistory(args.history_id, { title: args.title, content: args.content }), null, 2) }] };
       case 'worldanvil_delete_history': return { content: [{ type: 'text', text: JSON.stringify(await client.deleteHistory(args.history_id), null, 2) }] };
 
