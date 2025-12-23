@@ -1,0 +1,26 @@
+{
+  "name": "worldanvil-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for World Anvil API integration with Claude Code",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "keywords": [
+    "mcp",
+    "worldanvil",
+    "claude-code",
+    "worldbuilding"
+  ],
+  "author": "Leighton Carden",
+  "license": "MIT",
+  "dependencies": {
+    "@crit-fumble/worldanvil": "^3.1.0",
+    "@modelcontextprotocol/sdk": "^1.0.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

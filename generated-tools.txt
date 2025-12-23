@@ -1,0 +1,803 @@
+// Generated tool definitions - add these to the tools array in index.js
+
+
+      // CAMPAIGN NOTEBOOK/JOURNAL
+      {
+        name: 'worldanvil_get_notebook',
+        description: 'Get a specific Campaign notebook/journal by ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            notebook_id: {
+              type: 'string',
+              description: 'The ID of the notebook to retrieve',
+            },
+          },
+          required: ['notebook_id'],
+        },
+      },
+      {
+        name: 'worldanvil_list_notebooks',
+        description: 'List notebooks in a world',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            world_id: {
+              type: 'string',
+              description: 'The ID of the world to list notebooks from',
+            },
+            offset: {
+              type: 'number',
+              description: 'Pagination offset (optional)',
+            },
+            limit: {
+              type: 'number',
+              description: 'Maximum number of notebooks to return (optional)',
+            },
+          },
+          required: ['world_id'],
+        },
+      },
+      {
+        name: 'worldanvil_create_notebook',
+        description: 'Create a new Campaign notebook/journal',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            title: {
+              type: 'string',
+              description: 'The title of the notebook',
+            },
+            world_id: {
+              type: 'string',
+              description: 'The ID of the world to create the notebook in',
+            },
+            content: {
+              type: 'string',
+              description: 'The content of the notebook (optional)',
+            },
+          },
+          required: ['title', 'world_id'],
+        },
+      },
+      {
+        name: 'worldanvil_update_notebook',
+        description: 'Update an existing Campaign notebook/journal',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            notebook_id: {
+              type: 'string',
+              description: 'The ID of the notebook to update',
+            },
+            title: {
+              type: 'string',
+              description: 'The new title (optional)',
+            },
+            content: {
+              type: 'string',
+              description: 'The new content (optional)',
+            },
+          },
+          required: ['notebook_id'],
+        },
+      },
+      {
+        name: 'worldanvil_delete_notebook',
+        description: 'Delete a Campaign notebook/journal',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            notebook_id: {
+              type: 'string',
+              description: 'The ID of the notebook to delete',
+            },
+          },
+          required: ['notebook_id'],
+        },
+      },
+
+      // SECTION WITHIN A NOTEBOOK
+      {
+        name: 'worldanvil_get_notesection',
+        description: 'Get a specific Section within a notebook by ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            notesection_id: {
+              type: 'string',
+              description: 'The ID of the notesection to retrieve',
+            },
+          },
+          required: ['notesection_id'],
+        },
+      },
+      {
+        name: 'worldanvil_list_notesections',
+        description: 'List notesections in a notebook',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            notebook_id: {
+              type: 'string',
+              description: 'The ID of the notebook to list notesections from',
+            },
+            offset: {
+              type: 'number',
+              description: 'Pagination offset (optional)',
+            },
+            limit: {
+              type: 'number',
+              description: 'Maximum number of notesections to return (optional)',
+            },
+          },
+          required: ['notebook_id'],
+        },
+      },
+      {
+        name: 'worldanvil_create_notesection',
+        description: 'Create a new Section within a notebook',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            title: {
+              type: 'string',
+              description: 'The title of the notesection',
+            },
+            notebook_id: {
+              type: 'string',
+              description: 'The ID of the notebook to create the notesection in',
+            },
+            content: {
+              type: 'string',
+              description: 'The content of the notesection (optional)',
+            },
+          },
+          required: ['title', 'notebook_id'],
+        },
+      },
+      {
+        name: 'worldanvil_update_notesection',
+        description: 'Update an existing Section within a notebook',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            notesection_id: {
+              type: 'string',
+              description: 'The ID of the notesection to update',
+            },
+            title: {
+              type: 'string',
+              description: 'The new title (optional)',
+            },
+            content: {
+              type: 'string',
+              description: 'The new content (optional)',
+            },
+          },
+          required: ['notesection_id'],
+        },
+      },
+      {
+        name: 'worldanvil_delete_notesection',
+        description: 'Delete a Section within a notebook',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            notesection_id: {
+              type: 'string',
+              description: 'The ID of the notesection to delete',
+            },
+          },
+          required: ['notesection_id'],
+        },
+      },
+
+      // INDIVIDUAL SESSION NOTE
+      {
+        name: 'worldanvil_get_note',
+        description: 'Get a specific Individual session note by ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            note_id: {
+              type: 'string',
+              description: 'The ID of the note to retrieve',
+            },
+          },
+          required: ['note_id'],
+        },
+      },
+      {
+        name: 'worldanvil_list_notes',
+        description: 'List notes in a notesection',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            notesection_id: {
+              type: 'string',
+              description: 'The ID of the notesection to list notes from',
+            },
+            offset: {
+              type: 'number',
+              description: 'Pagination offset (optional)',
+            },
+            limit: {
+              type: 'number',
+              description: 'Maximum number of notes to return (optional)',
+            },
+          },
+          required: ['notesection_id'],
+        },
+      },
+      {
+        name: 'worldanvil_create_note',
+        description: 'Create a new Individual session note',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            title: {
+              type: 'string',
+              description: 'The title of the note',
+            },
+            notesection_id: {
+              type: 'string',
+              description: 'The ID of the notesection to create the note in',
+            },
+            content: {
+              type: 'string',
+              description: 'The content of the note (optional)',
+            },
+          },
+          required: ['title', 'notesection_id'],
+        },
+      },
+      {
+        name: 'worldanvil_update_note',
+        description: 'Update an existing Individual session note',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            note_id: {
+              type: 'string',
+              description: 'The ID of the note to update',
+            },
+            title: {
+              type: 'string',
+              description: 'The new title (optional)',
+            },
+            content: {
+              type: 'string',
+              description: 'The new content (optional)',
+            },
+          },
+          required: ['note_id'],
+        },
+      },
+      {
+        name: 'worldanvil_delete_note',
+        description: 'Delete a Individual session note',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            note_id: {
+              type: 'string',
+              description: 'The ID of the note to delete',
+            },
+          },
+          required: ['note_id'],
+        },
+      },
+
+      // GM-ONLY SECRET INFORMATION
+      {
+        name: 'worldanvil_get_secret',
+        description: 'Get a specific GM-only secret information by ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            secret_id: {
+              type: 'string',
+              description: 'The ID of the secret to retrieve',
+            },
+          },
+          required: ['secret_id'],
+        },
+      },
+      {
+        name: 'worldanvil_list_secrets',
+        description: 'List secrets in a world',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            world_id: {
+              type: 'string',
+              description: 'The ID of the world to list secrets from',
+            },
+            offset: {
+              type: 'number',
+              description: 'Pagination offset (optional)',
+            },
+            limit: {
+              type: 'number',
+              description: 'Maximum number of secrets to return (optional)',
+            },
+          },
+          required: ['world_id'],
+        },
+      },
+      {
+        name: 'worldanvil_create_secret',
+        description: 'Create a new GM-only secret information',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            title: {
+              type: 'string',
+              description: 'The title of the secret',
+            },
+            world_id: {
+              type: 'string',
+              description: 'The ID of the world to create the secret in',
+            },
+            content: {
+              type: 'string',
+              description: 'The content of the secret (optional)',
+            },
+          },
+          required: ['title', 'world_id'],
+        },
+      },
+      {
+        name: 'worldanvil_update_secret',
+        description: 'Update an existing GM-only secret information',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            secret_id: {
+              type: 'string',
+              description: 'The ID of the secret to update',
+            },
+            title: {
+              type: 'string',
+              description: 'The new title (optional)',
+            },
+            content: {
+              type: 'string',
+              description: 'The new content (optional)',
+            },
+          },
+          required: ['secret_id'],
+        },
+      },
+      {
+        name: 'worldanvil_delete_secret',
+        description: 'Delete a GM-only secret information',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            secret_id: {
+              type: 'string',
+              description: 'The ID of the secret to delete',
+            },
+          },
+          required: ['secret_id'],
+        },
+      },
+
+      // INTERACTIVE WORLD MAP
+      {
+        name: 'worldanvil_get_map',
+        description: 'Get a specific Interactive world map by ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            map_id: {
+              type: 'string',
+              description: 'The ID of the map to retrieve',
+            },
+          },
+          required: ['map_id'],
+        },
+      },
+      {
+        name: 'worldanvil_list_maps',
+        description: 'List maps in a world',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            world_id: {
+              type: 'string',
+              description: 'The ID of the world to list maps from',
+            },
+            offset: {
+              type: 'number',
+              description: 'Pagination offset (optional)',
+            },
+            limit: {
+              type: 'number',
+              description: 'Maximum number of maps to return (optional)',
+            },
+          },
+          required: ['world_id'],
+        },
+      },
+      {
+        name: 'worldanvil_create_map',
+        description: 'Create a new Interactive world map',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            title: {
+              type: 'string',
+              description: 'The title of the map',
+            },
+            world_id: {
+              type: 'string',
+              description: 'The ID of the world to create the map in',
+            },
+            content: {
+              type: 'string',
+              description: 'The content of the map (optional)',
+            },
+          },
+          required: ['title', 'world_id'],
+        },
+      },
+      {
+        name: 'worldanvil_update_map',
+        description: 'Update an existing Interactive world map',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            map_id: {
+              type: 'string',
+              description: 'The ID of the map to update',
+            },
+            title: {
+              type: 'string',
+              description: 'The new title (optional)',
+            },
+            content: {
+              type: 'string',
+              description: 'The new content (optional)',
+            },
+          },
+          required: ['map_id'],
+        },
+      },
+      {
+        name: 'worldanvil_delete_map',
+        description: 'Delete a Interactive world map',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            map_id: {
+              type: 'string',
+              description: 'The ID of the map to delete',
+            },
+          },
+          required: ['map_id'],
+        },
+      },
+
+      // MARKER ON A MAP
+      {
+        name: 'worldanvil_get_marker',
+        description: 'Get a specific Marker on a map by ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            marker_id: {
+              type: 'string',
+              description: 'The ID of the marker to retrieve',
+            },
+          },
+          required: ['marker_id'],
+        },
+      },
+      {
+        name: 'worldanvil_list_markers',
+        description: 'List markers in a map',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            map_id: {
+              type: 'string',
+              description: 'The ID of the map to list markers from',
+            },
+            offset: {
+              type: 'number',
+              description: 'Pagination offset (optional)',
+            },
+            limit: {
+              type: 'number',
+              description: 'Maximum number of markers to return (optional)',
+            },
+          },
+          required: ['map_id'],
+        },
+      },
+      {
+        name: 'worldanvil_create_marker',
+        description: 'Create a new Marker on a map',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            title: {
+              type: 'string',
+              description: 'The title of the marker',
+            },
+            map_id: {
+              type: 'string',
+              description: 'The ID of the map to create the marker in',
+            },
+            content: {
+              type: 'string',
+              description: 'The content of the marker (optional)',
+            },
+          },
+          required: ['title', 'map_id'],
+        },
+      },
+      {
+        name: 'worldanvil_update_marker',
+        description: 'Update an existing Marker on a map',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            marker_id: {
+              type: 'string',
+              description: 'The ID of the marker to update',
+            },
+            title: {
+              type: 'string',
+              description: 'The new title (optional)',
+            },
+            content: {
+              type: 'string',
+              description: 'The new content (optional)',
+            },
+          },
+          required: ['marker_id'],
+        },
+      },
+      {
+        name: 'worldanvil_delete_marker',
+        description: 'Delete a Marker on a map',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            marker_id: {
+              type: 'string',
+              description: 'The ID of the marker to delete',
+            },
+          },
+          required: ['marker_id'],
+        },
+      },
+
+      // HISTORICAL TIMELINE
+      {
+        name: 'worldanvil_get_timeline',
+        description: 'Get a specific Historical timeline by ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            timeline_id: {
+              type: 'string',
+              description: 'The ID of the timeline to retrieve',
+            },
+          },
+          required: ['timeline_id'],
+        },
+      },
+      {
+        name: 'worldanvil_list_timelines',
+        description: 'List timelines in a world',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            world_id: {
+              type: 'string',
+              description: 'The ID of the world to list timelines from',
+            },
+            offset: {
+              type: 'number',
+              description: 'Pagination offset (optional)',
+            },
+            limit: {
+              type: 'number',
+              description: 'Maximum number of timelines to return (optional)',
+            },
+          },
+          required: ['world_id'],
+        },
+      },
+      {
+        name: 'worldanvil_create_timeline',
+        description: 'Create a new Historical timeline',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            title: {
+              type: 'string',
+              description: 'The title of the timeline',
+            },
+            world_id: {
+              type: 'string',
+              description: 'The ID of the world to create the timeline in',
+            },
+            content: {
+              type: 'string',
+              description: 'The content of the timeline (optional)',
+            },
+          },
+          required: ['title', 'world_id'],
+        },
+      },
+      {
+        name: 'worldanvil_update_timeline',
+        description: 'Update an existing Historical timeline',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            timeline_id: {
+              type: 'string',
+              description: 'The ID of the timeline to update',
+            },
+            title: {
+              type: 'string',
+              description: 'The new title (optional)',
+            },
+            content: {
+              type: 'string',
+              description: 'The new content (optional)',
+            },
+          },
+          required: ['timeline_id'],
+        },
+      },
+      {
+        name: 'worldanvil_delete_timeline',
+        description: 'Delete a Historical timeline',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            timeline_id: {
+              type: 'string',
+              description: 'The ID of the timeline to delete',
+            },
+          },
+          required: ['timeline_id'],
+        },
+      },
+
+      // HISTORICAL EVENT/TIMELINE ENTRY
+      {
+        name: 'worldanvil_get_history',
+        description: 'Get a specific Historical event/timeline entry by ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            history_id: {
+              type: 'string',
+              description: 'The ID of the history to retrieve',
+            },
+          },
+          required: ['history_id'],
+        },
+      },
+      {
+        name: 'worldanvil_list_histories',
+        description: 'List histories in a world',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            world_id: {
+              type: 'string',
+              description: 'The ID of the world to list histories from',
+            },
+            offset: {
+              type: 'number',
+              description: 'Pagination offset (optional)',
+            },
+            limit: {
+              type: 'number',
+              description: 'Maximum number of histories to return (optional)',
+            },
+          },
+          required: ['world_id'],
+        },
+      },
+      {
+        name: 'worldanvil_create_history',
+        description: 'Create a new Historical event/timeline entry',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            title: {
+              type: 'string',
+              description: 'The title of the history',
+            },
+            world_id: {
+              type: 'string',
+              description: 'The ID of the world to create the history in',
+            },
+            content: {
+              type: 'string',
+              description: 'The content of the history (optional)',
+            },
+          },
+          required: ['title', 'world_id'],
+        },
+      },
+      {
+        name: 'worldanvil_update_history',
+        description: 'Update an existing Historical event/timeline entry',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            history_id: {
+              type: 'string',
+              description: 'The ID of the history to update',
+            },
+            title: {
+              type: 'string',
+              description: 'The new title (optional)',
+            },
+            content: {
+              type: 'string',
+              description: 'The new content (optional)',
+            },
+          },
+          required: ['history_id'],
+        },
+      },
+      {
+        name: 'worldanvil_delete_history',
+        description: 'Delete a Historical event/timeline entry',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            history_id: {
+              type: 'string',
+              description: 'The ID of the history to delete',
+            },
+          },
+          required: ['history_id'],
+        },
+      },
+
+      // RPG SYSTEMS
+      {
+        name: 'worldanvil_get_rpgsystem',
+        description: 'Get a specific RPG system by ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            rpgsystem_id: {
+              type: 'string',
+              description: 'The ID of the RPG system to retrieve',
+            },
+          },
+          required: ['rpgsystem_id'],
+        },
+      },
+      {
+        name: 'worldanvil_list_rpgsystems',
+        description: 'List all available RPG systems',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            offset: {
+              type: 'number',
+              description: 'Pagination offset (optional)',
+            },
+            limit: {
+              type: 'number',
+              description: 'Maximum number of systems to return (optional)',
+            },
+          },
+        },
+      },
