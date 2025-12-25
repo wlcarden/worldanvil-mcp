@@ -598,7 +598,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: 'worldanvil_create_article',
-        description: 'Create a new article in WorldAnvil',
+        description: 'Create a new article in WorldAnvil. Use the fields parameter to set template-specific fields like localization, manifestation, lawtype (for Law), anatomy, traits (for Species), etc.',
         inputSchema: {
           type: 'object',
           properties: {
@@ -612,11 +612,16 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             template: {
               type: 'string',
-              description: 'The template type for the article (optional)',
+              description: 'The template type for the article (e.g., law, species, ethnicity, material)',
             },
             content: {
               type: 'string',
-              description: 'The content of the article (optional)',
+              description: 'The main content/intro of the article (optional)',
+            },
+            fields: {
+              type: 'object',
+              description: 'Template-specific fields as key-value pairs (e.g., {"localization": "...", "manifestation": "...", "lawtype": "..."} for Law template)',
+              additionalProperties: true,
             },
           },
           required: ['title', 'world_id'],
@@ -624,7 +629,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: 'worldanvil_update_article',
-        description: 'Update an existing article in WorldAnvil',
+        description: 'Update an existing article in WorldAnvil. Use the fields parameter to update template-specific fields.',
         inputSchema: {
           type: 'object',
           properties: {
@@ -638,7 +643,12 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             content: {
               type: 'string',
-              description: 'The new content of the article (optional)',
+              description: 'The new main content of the article (optional)',
+            },
+            fields: {
+              type: 'object',
+              description: 'Template-specific fields to update as key-value pairs',
+              additionalProperties: true,
             },
           },
           required: ['article_id'],
@@ -933,10 +943,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case 'worldanvil_create_article': {
         const data = {
           title: args.title,
-          world: args.world_id,  // WorldAnvil API expects 'world' not 'world_id'
+          world: { id: args.world_id },  // WorldAnvil API expects nested object format
         };
-        if (args.template !== undefined) data.template = args.template;
+        if (args.template !== undefined) data.templateType = args.template;
         if (args.content !== undefined) data.content = args.content;
+        // Spread any additional template-specific fields
+        if (args.fields !== undefined && typeof args.fields === 'object') {
+          Object.assign(data, args.fields);
+        }
 
         const result = await client.createArticle(data);
         return {
@@ -953,6 +967,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const data = {};
         if (args.title !== undefined) data.title = args.title;
         if (args.content !== undefined) data.content = args.content;
+        // Spread any additional template-specific fields
+        if (args.fields !== undefined && typeof args.fields === 'object') {
+          Object.assign(data, args.fields);
+        }
 
         const result = await client.updateArticle(args.article_id, data);
         return {
@@ -980,7 +998,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case 'worldanvil_create_category': {
         const data = {
           title: args.title,
-          world: args.world_id,  // WorldAnvil API expects 'world' not 'world_id'
+          world: { id: args.world_id },  // WorldAnvil API expects nested object format
         };
         const result = await client.createCategory(data);
         return {
@@ -1065,7 +1083,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       // NOTEBOOKS
       case 'worldanvil_get_notebook': return { content: [{ type: 'text', text: JSON.stringify(await client.getNotebook(args.notebook_id), null, 2) }] };
       case 'worldanvil_list_notebooks': return { content: [{ type: 'text', text: JSON.stringify(await client.listNotebooks(args.world_id, { offset: args.offset, limit: args.limit }), null, 2) }] };
-      case 'worldanvil_create_notebook': return { content: [{ type: 'text', text: JSON.stringify(await client.createNotebook({ title: args.title, world: args.world_id }), null, 2) }] };
+      case 'worldanvil_create_notebook': return { content: [{ type: 'text', text: JSON.stringify(await client.createNotebook({ title: args.title, world: { id: args.world_id } }), null, 2) }] };
       case 'worldanvil_update_notebook': return { content: [{ type: 'text', text: JSON.stringify(await client.updateNotebook(args.notebook_id, { title: args.title }), null, 2) }] };
       case 'worldanvil_delete_notebook': return { content: [{ type: 'text', text: JSON.stringify(await client.deleteNotebook(args.notebook_id), null, 2) }] };
 
@@ -1086,14 +1104,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       // SECRETS
       case 'worldanvil_get_secret': return { content: [{ type: 'text', text: JSON.stringify(await client.getSecret(args.secret_id), null, 2) }] };
       case 'worldanvil_list_secrets': return { content: [{ type: 'text', text: JSON.stringify(await client.listSecrets(args.world_id, { offset: args.offset, limit: args.limit }), null, 2) }] };
-      case 'worldanvil_create_secret': return { content: [{ type: 'text', text: JSON.stringify(await client.createSecret({ title: args.title, world: args.world_id, content: args.content }), null, 2) }] };
+      case 'worldanvil_create_secret': return { content: [{ type: 'text', text: JSON.stringify(await client.createSecret({ title: args.title, world: { id: args.world_id }, content: args.content }), null, 2) }] };
       case 'worldanvil_update_secret': return { content: [{ type: 'text', text: JSON.stringify(await client.updateSecret(args.secret_id, { title: args.title, content: args.content }), null, 2) }] };
       case 'worldanvil_delete_secret': return { content: [{ type: 'text', text: JSON.stringify(await client.deleteSecret(args.secret_id), null, 2) }] };
 
       // MAPS
       case 'worldanvil_get_map': return { content: [{ type: 'text', text: JSON.stringify(await client.getMap(args.map_id), null, 2) }] };
       case 'worldanvil_list_maps': return { content: [{ type: 'text', text: JSON.stringify(await client.listMaps(args.world_id, { offset: args.offset, limit: args.limit }), null, 2) }] };
-      case 'worldanvil_create_map': return { content: [{ type: 'text', text: JSON.stringify(await client.createMap({ title: args.title, world: args.world_id }), null, 2) }] };
+      case 'worldanvil_create_map': return { content: [{ type: 'text', text: JSON.stringify(await client.createMap({ title: args.title, world: { id: args.world_id } }), null, 2) }] };
       case 'worldanvil_update_map': return { content: [{ type: 'text', text: JSON.stringify(await client.updateMap(args.map_id, { title: args.title }), null, 2) }] };
       case 'worldanvil_delete_map': return { content: [{ type: 'text', text: JSON.stringify(await client.deleteMap(args.map_id), null, 2) }] };
 
@@ -1107,14 +1125,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       // TIMELINES
       case 'worldanvil_get_timeline': return { content: [{ type: 'text', text: JSON.stringify(await client.getTimeline(args.timeline_id), null, 2) }] };
       case 'worldanvil_list_timelines': return { content: [{ type: 'text', text: JSON.stringify(await client.listTimelines(args.world_id, { offset: args.offset, limit: args.limit }), null, 2) }] };
-      case 'worldanvil_create_timeline': return { content: [{ type: 'text', text: JSON.stringify(await client.createTimeline({ title: args.title, world: args.world_id }), null, 2) }] };
+      case 'worldanvil_create_timeline': return { content: [{ type: 'text', text: JSON.stringify(await client.createTimeline({ title: args.title, world: { id: args.world_id } }), null, 2) }] };
       case 'worldanvil_update_timeline': return { content: [{ type: 'text', text: JSON.stringify(await client.updateTimeline(args.timeline_id, { title: args.title }), null, 2) }] };
       case 'worldanvil_delete_timeline': return { content: [{ type: 'text', text: JSON.stringify(await client.deleteTimeline(args.timeline_id), null, 2) }] };
 
       // HISTORY EVENTS
       case 'worldanvil_get_history': return { content: [{ type: 'text', text: JSON.stringify(await client.getHistory(args.history_id), null, 2) }] };
       case 'worldanvil_list_histories': return { content: [{ type: 'text', text: JSON.stringify(await client.listHistories(args.world_id, { offset: args.offset, limit: args.limit }), null, 2) }] };
-      case 'worldanvil_create_history': return { content: [{ type: 'text', text: JSON.stringify(await client.createHistory({ title: args.title, world: args.world_id, content: args.content }), null, 2) }] };
+      case 'worldanvil_create_history': return { content: [{ type: 'text', text: JSON.stringify(await client.createHistory({ title: args.title, world: { id: args.world_id }, content: args.content }), null, 2) }] };
       case 'worldanvil_update_history': return { content: [{ type: 'text', text: JSON.stringify(await client.updateHistory(args.history_id, { title: args.title, content: args.content }), null, 2) }] };
       case 'worldanvil_delete_history': return { content: [{ type: 'text', text: JSON.stringify(await client.deleteHistory(args.history_id), null, 2) }] };
 
