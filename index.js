@@ -10,6 +10,7 @@
  *   WA_AUTH_TOKEN - World Anvil User Authentication Token
  *
  * Changelog:
+ *   v1.1.1 - Fixed PATCH endpoints to use query params (was causing 404 errors)
  *   v1.1.0 - Added automatic Markdown to BBCode conversion for all content fields
  *   v1.0.1 - Added template-specific fields support, fixed world reference format
  *   v1.0.0 - Initial release with basic CRUD operations
@@ -307,7 +308,7 @@ class WorldAnvilClient {
    * Update an existing article
    */
   async updateArticle(articleId, data) {
-    return this.request('/article', 'PATCH', { id: articleId, ...data });
+    return this.request(`/article?id=${articleId}`, 'PATCH', data);
   }
 
   /**
@@ -341,7 +342,7 @@ class WorldAnvilClient {
    * Update an existing category
    */
   async updateCategory(categoryId, data) {
-    return this.request('/category', 'PATCH', { id: categoryId, ...data });
+    return this.request(`/category?id=${categoryId}`, 'PATCH', data);
   }
 
   /**
@@ -369,7 +370,7 @@ class WorldAnvilClient {
    * Update an existing world
    */
   async updateWorld(worldId, data) {
-    return this.request('/world', 'PATCH', { id: worldId, ...data });
+    return this.request(`/world?id=${worldId}`, 'PATCH', data);
   }
 
   /**
@@ -410,7 +411,7 @@ class WorldAnvilClient {
   }
 
   async updateNotebook(notebookId, data) {
-    return this.request('/notebook', 'PATCH', { id: notebookId, ...data });
+    return this.request(`/notebook?id=${notebookId}`, 'PATCH', data);
   }
 
   async deleteNotebook(notebookId) {
@@ -435,7 +436,7 @@ class WorldAnvilClient {
   }
 
   async updateNotesection(notesectionId, data) {
-    return this.request('/notesection', 'PATCH', { id: notesectionId, ...data });
+    return this.request(`/notesection?id=${notesectionId}`, 'PATCH', data);
   }
 
   async deleteNotesection(notesectionId) {
@@ -460,7 +461,7 @@ class WorldAnvilClient {
   }
 
   async updateNote(noteId, data) {
-    return this.request('/note', 'PATCH', { id: noteId, ...data });
+    return this.request(`/note?id=${noteId}`, 'PATCH', data);
   }
 
   async deleteNote(noteId) {
@@ -485,7 +486,7 @@ class WorldAnvilClient {
   }
 
   async updateSecret(secretId, data) {
-    return this.request('/secret', 'PATCH', { id: secretId, ...data });
+    return this.request(`/secret?id=${secretId}`, 'PATCH', data);
   }
 
   async deleteSecret(secretId) {
@@ -510,7 +511,7 @@ class WorldAnvilClient {
   }
 
   async updateMap(mapId, data) {
-    return this.request('/map', 'PATCH', { id: mapId, ...data });
+    return this.request(`/map?id=${mapId}`, 'PATCH', data);
   }
 
   async deleteMap(mapId) {
@@ -535,7 +536,7 @@ class WorldAnvilClient {
   }
 
   async updateMarker(markerId, data) {
-    return this.request('/marker', 'PATCH', { id: markerId, ...data });
+    return this.request(`/marker?id=${markerId}`, 'PATCH', data);
   }
 
   async deleteMarker(markerId) {
@@ -560,7 +561,7 @@ class WorldAnvilClient {
   }
 
   async updateTimeline(timelineId, data) {
-    return this.request('/timeline', 'PATCH', { id: timelineId, ...data });
+    return this.request(`/timeline?id=${timelineId}`, 'PATCH', data);
   }
 
   async deleteTimeline(timelineId) {
@@ -585,7 +586,7 @@ class WorldAnvilClient {
   }
 
   async updateHistory(historyId, data) {
-    return this.request('/history', 'PATCH', { id: historyId, ...data });
+    return this.request(`/history?id=${historyId}`, 'PATCH', data);
   }
 
   async deleteHistory(historyId) {
