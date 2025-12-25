@@ -8,6 +8,11 @@
  * Environment variables:
  *   WA_APP_KEY - World Anvil Application Key
  *   WA_AUTH_TOKEN - World Anvil User Authentication Token
+ *
+ * Changelog:
+ *   v1.1.0 - Added automatic Markdown to BBCode conversion for all content fields
+ *   v1.0.1 - Added template-specific fields support, fixed world reference format
+ *   v1.0.0 - Initial release with basic CRUD operations
  */
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
@@ -27,6 +32,149 @@ const AUTH_TOKEN = process.env.WA_AUTH_TOKEN;
 if (!APP_KEY || !AUTH_TOKEN) {
   console.error('Error: WA_APP_KEY and WA_AUTH_TOKEN environment variables must be set');
   process.exit(1);
+}
+
+/**
+ * Convert Markdown to World Anvil BBCode
+ *
+ * Handles common markdown patterns and converts them to BBCode format
+ * that World Anvil expects for article content.
+ */
+function markdownToBBCode(text) {
+  if (!text || typeof text !== 'string') return text;
+
+  let result = text;
+
+  // Code blocks (must be done before other processing)
+  // Fenced code blocks: ```code``` or ```lang\ncode\n```
+  result = result.replace(/```[\w]*\n?([\s\S]*?)```/g, '[code]$1[/code]');
+
+  // Inline code: `code`
+  result = result.replace(/`([^`]+)`/g, '[code]$1[/code]');
+
+  // Headers (h1-h4) - must process before bold since # could appear in text
+  result = result.replace(/^#### (.+)$/gm, '[h4]$1[/h4]');
+  result = result.replace(/^### (.+)$/gm, '[h3]$1[/h3]');
+  result = result.replace(/^## (.+)$/gm, '[h2]$1[/h2]');
+  result = result.replace(/^# (.+)$/gm, '[h1]$1[/h1]');
+
+  // Bold: **text** or __text__
+  result = result.replace(/\*\*([^*]+)\*\*/g, '[b]$1[/b]');
+  result = result.replace(/__([^_]+)__/g, '[b]$1[/b]');
+
+  // Italic: *text* or _text_ (but not inside words)
+  result = result.replace(/(?<!\w)\*([^*]+)\*(?!\w)/g, '[i]$1[/i]');
+  result = result.replace(/(?<!\w)_([^_]+)_(?!\w)/g, '[i]$1[/i]');
+
+  // Strikethrough: ~~text~~
+  result = result.replace(/~~([^~]+)~~/g, '[s]$1[/s]');
+
+  // Links: [text](url)
+  result = result.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '[url=$2]$1[/url]');
+
+  // Horizontal rules: --- or *** or ___
+  result = result.replace(/^[-*_]{3,}$/gm, '[hr]');
+
+  // Blockquotes: > text (can be multi-line)
+  result = result.replace(/^> (.+)$/gm, '[quote]$1[/quote]');
+  // Merge adjacent quotes
+  result = result.replace(/\[\/quote\]\n\[quote\]/g, '\n');
+
+  // Unordered lists: - item or * item
+  // First, identify list blocks and wrap them
+  const lines = result.split('\n');
+  const processedLines = [];
+  let inList = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const isListItem = /^[-*] (.+)$/.test(line);
+
+    if (isListItem && !inList) {
+      // Start of a new list
+      inList = true;
+      processedLines.push('[list]');
+      processedLines.push(line.replace(/^[-*] (.+)$/, '[*] $1'));
+    } else if (isListItem && inList) {
+      // Continue list
+      processedLines.push(line.replace(/^[-*] (.+)$/, '[*] $1'));
+    } else if (!isListItem && inList) {
+      // End of list
+      inList = false;
+      processedLines.push('[/list]');
+      processedLines.push(line);
+    } else {
+      processedLines.push(line);
+    }
+  }
+
+  // Close list if we ended while still in one
+  if (inList) {
+    processedLines.push('[/list]');
+  }
+
+  result = processedLines.join('\n');
+
+  // Tables: | col1 | col2 | -> [table][tr][td]col1[/td][td]col2[/td][/tr][/table]
+  // This is more complex - handle basic tables
+  const tableRegex = /^\|(.+)\|$/gm;
+  const tableLines = result.split('\n');
+  let inTable = false;
+  let tableResult = [];
+
+  for (let i = 0; i < tableLines.length; i++) {
+    const line = tableLines[i];
+    const isTableRow = /^\|(.+)\|$/.test(line);
+    const isSeparator = /^\|[-:\s|]+\|$/.test(line);
+
+    if (isTableRow && !inTable) {
+      // Start of table
+      inTable = true;
+      tableResult.push('[table]');
+      if (!isSeparator) {
+        const cells = line.slice(1, -1).split('|').map(c => c.trim());
+        tableResult.push('[tr]' + cells.map(c => '[th]' + c + '[/th]').join('') + '[/tr]');
+      }
+    } else if (isTableRow && inTable) {
+      if (!isSeparator) {
+        const cells = line.slice(1, -1).split('|').map(c => c.trim());
+        tableResult.push('[tr]' + cells.map(c => '[td]' + c + '[/td]').join('') + '[/tr]');
+      }
+      // Skip separator rows (|---|---|)
+    } else if (!isTableRow && inTable) {
+      // End of table
+      inTable = false;
+      tableResult.push('[/table]');
+      tableResult.push(line);
+    } else {
+      tableResult.push(line);
+    }
+  }
+
+  if (inTable) {
+    tableResult.push('[/table]');
+  }
+
+  result = tableResult.join('\n');
+
+  return result;
+}
+
+/**
+ * Convert all text fields in an object from Markdown to BBCode
+ */
+function convertFieldsToBBCode(data) {
+  if (!data || typeof data !== 'object') return data;
+
+  const converted = { ...data };
+
+  for (const [key, value] of Object.entries(converted)) {
+    if (typeof value === 'string') {
+      converted[key] = markdownToBBCode(value);
+    }
+  }
+
+  return converted;
 }
 
 /**
@@ -465,7 +613,7 @@ const client = new WorldAnvilClient();
 const server = new Server(
   {
     name: 'worldanvil-mcp',
-    version: '1.0.0',
+    version: '1.1.0',
   },
   {
     capabilities: {
@@ -598,7 +746,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: 'worldanvil_create_article',
-        description: 'Create a new article in WorldAnvil. Use the fields parameter to set template-specific fields like localization, manifestation, lawtype (for Law), anatomy, traits (for Species), etc.',
+        description: 'Create a new article in WorldAnvil. Markdown content is automatically converted to BBCode. Use the fields parameter to set template-specific fields like localization, manifestation, lawtype (for Law), anatomy, traits (for Species), etc.',
         inputSchema: {
           type: 'object',
           properties: {
@@ -629,7 +777,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: 'worldanvil_update_article',
-        description: 'Update an existing article in WorldAnvil. Use the fields parameter to update template-specific fields.',
+        description: 'Update an existing article in WorldAnvil. Markdown content is automatically converted to BBCode. Use the fields parameter to update template-specific fields.',
         inputSchema: {
           type: 'object',
           properties: {
@@ -946,10 +1094,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           world: { id: args.world_id },  // WorldAnvil API expects nested object format
         };
         if (args.template !== undefined) data.templateType = args.template;
-        if (args.content !== undefined) data.content = args.content;
-        // Spread any additional template-specific fields
+        if (args.content !== undefined) data.content = markdownToBBCode(args.content);
+        // Spread any additional template-specific fields (with markdown conversion)
         if (args.fields !== undefined && typeof args.fields === 'object') {
-          Object.assign(data, args.fields);
+          Object.assign(data, convertFieldsToBBCode(args.fields));
         }
 
         const result = await client.createArticle(data);
@@ -966,10 +1114,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case 'worldanvil_update_article': {
         const data = {};
         if (args.title !== undefined) data.title = args.title;
-        if (args.content !== undefined) data.content = args.content;
-        // Spread any additional template-specific fields
+        if (args.content !== undefined) data.content = markdownToBBCode(args.content);
+        // Spread any additional template-specific fields (with markdown conversion)
         if (args.fields !== undefined && typeof args.fields === 'object') {
-          Object.assign(data, args.fields);
+          Object.assign(data, convertFieldsToBBCode(args.fields));
         }
 
         const result = await client.updateArticle(args.article_id, data);
@@ -1097,15 +1245,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       // NOTES
       case 'worldanvil_get_note': return { content: [{ type: 'text', text: JSON.stringify(await client.getNote(args.note_id), null, 2) }] };
       case 'worldanvil_list_notes': return { content: [{ type: 'text', text: JSON.stringify(await client.listNotes(args.notesection_id, { offset: args.offset, limit: args.limit }), null, 2) }] };
-      case 'worldanvil_create_note': return { content: [{ type: 'text', text: JSON.stringify(await client.createNote({ title: args.title, notesection: args.notesection_id, content: args.content }), null, 2) }] };
-      case 'worldanvil_update_note': return { content: [{ type: 'text', text: JSON.stringify(await client.updateNote(args.note_id, { title: args.title, content: args.content }), null, 2) }] };
+      case 'worldanvil_create_note': return { content: [{ type: 'text', text: JSON.stringify(await client.createNote({ title: args.title, notesection: args.notesection_id, content: markdownToBBCode(args.content) }), null, 2) }] };
+      case 'worldanvil_update_note': return { content: [{ type: 'text', text: JSON.stringify(await client.updateNote(args.note_id, { title: args.title, content: markdownToBBCode(args.content) }), null, 2) }] };
       case 'worldanvil_delete_note': return { content: [{ type: 'text', text: JSON.stringify(await client.deleteNote(args.note_id), null, 2) }] };
 
       // SECRETS
       case 'worldanvil_get_secret': return { content: [{ type: 'text', text: JSON.stringify(await client.getSecret(args.secret_id), null, 2) }] };
       case 'worldanvil_list_secrets': return { content: [{ type: 'text', text: JSON.stringify(await client.listSecrets(args.world_id, { offset: args.offset, limit: args.limit }), null, 2) }] };
-      case 'worldanvil_create_secret': return { content: [{ type: 'text', text: JSON.stringify(await client.createSecret({ title: args.title, world: { id: args.world_id }, content: args.content }), null, 2) }] };
-      case 'worldanvil_update_secret': return { content: [{ type: 'text', text: JSON.stringify(await client.updateSecret(args.secret_id, { title: args.title, content: args.content }), null, 2) }] };
+      case 'worldanvil_create_secret': return { content: [{ type: 'text', text: JSON.stringify(await client.createSecret({ title: args.title, world: { id: args.world_id }, content: markdownToBBCode(args.content) }), null, 2) }] };
+      case 'worldanvil_update_secret': return { content: [{ type: 'text', text: JSON.stringify(await client.updateSecret(args.secret_id, { title: args.title, content: markdownToBBCode(args.content) }), null, 2) }] };
       case 'worldanvil_delete_secret': return { content: [{ type: 'text', text: JSON.stringify(await client.deleteSecret(args.secret_id), null, 2) }] };
 
       // MAPS
@@ -1132,8 +1280,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       // HISTORY EVENTS
       case 'worldanvil_get_history': return { content: [{ type: 'text', text: JSON.stringify(await client.getHistory(args.history_id), null, 2) }] };
       case 'worldanvil_list_histories': return { content: [{ type: 'text', text: JSON.stringify(await client.listHistories(args.world_id, { offset: args.offset, limit: args.limit }), null, 2) }] };
-      case 'worldanvil_create_history': return { content: [{ type: 'text', text: JSON.stringify(await client.createHistory({ title: args.title, world: { id: args.world_id }, content: args.content }), null, 2) }] };
-      case 'worldanvil_update_history': return { content: [{ type: 'text', text: JSON.stringify(await client.updateHistory(args.history_id, { title: args.title, content: args.content }), null, 2) }] };
+      case 'worldanvil_create_history': return { content: [{ type: 'text', text: JSON.stringify(await client.createHistory({ title: args.title, world: { id: args.world_id }, content: markdownToBBCode(args.content) }), null, 2) }] };
+      case 'worldanvil_update_history': return { content: [{ type: 'text', text: JSON.stringify(await client.updateHistory(args.history_id, { title: args.title, content: markdownToBBCode(args.content) }), null, 2) }] };
       case 'worldanvil_delete_history': return { content: [{ type: 'text', text: JSON.stringify(await client.deleteHistory(args.history_id), null, 2) }] };
 
       // RPG SYSTEMS
