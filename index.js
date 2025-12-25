@@ -10,6 +10,8 @@
  *   WA_AUTH_TOKEN - World Anvil User Authentication Token
  *
  * Changelog:
+ *   v1.2.0 - Improved template docs (use "article" not "generic"), better error messages,
+ *            added ordered list support to BBCode converter
  *   v1.1.1 - Fixed PATCH endpoints to use query params (was causing 404 errors)
  *   v1.1.0 - Added automatic Markdown to BBCode conversion for all content fields
  *   v1.0.1 - Added template-specific fields support, fixed world reference format
@@ -81,28 +83,49 @@ function markdownToBBCode(text) {
   // Merge adjacent quotes
   result = result.replace(/\[\/quote\]\n\[quote\]/g, '\n');
 
-  // Unordered lists: - item or * item
+  // Lists: unordered (- item or * item) and ordered (1. item, 2. item)
   // First, identify list blocks and wrap them
   const lines = result.split('\n');
   const processedLines = [];
   let inList = false;
+  let listType = null; // 'ul' for unordered, 'ol' for ordered
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    const isListItem = /^[-*] (.+)$/.test(line);
+    const isUnorderedItem = /^[-*] (.+)$/.test(line);
+    const isOrderedItem = /^\d+\. (.+)$/.test(line);
+    const isListItem = isUnorderedItem || isOrderedItem;
+    const currentType = isUnorderedItem ? 'ul' : (isOrderedItem ? 'ol' : null);
 
     if (isListItem && !inList) {
       // Start of a new list
       inList = true;
-      processedLines.push('[list]');
-      processedLines.push(line.replace(/^[-*] (.+)$/, '[*] $1'));
-    } else if (isListItem && inList) {
-      // Continue list
-      processedLines.push(line.replace(/^[-*] (.+)$/, '[*] $1'));
+      listType = currentType;
+      processedLines.push(listType === 'ol' ? '[ol]' : '[ul]');
+      const content = isUnorderedItem
+        ? line.replace(/^[-*] (.+)$/, '$1')
+        : line.replace(/^\d+\. (.+)$/, '$1');
+      processedLines.push('[li]' + content + '[/li]');
+    } else if (isListItem && inList && currentType === listType) {
+      // Continue same type of list
+      const content = isUnorderedItem
+        ? line.replace(/^[-*] (.+)$/, '$1')
+        : line.replace(/^\d+\. (.+)$/, '$1');
+      processedLines.push('[li]' + content + '[/li]');
+    } else if (isListItem && inList && currentType !== listType) {
+      // Different list type - close current, start new
+      processedLines.push(listType === 'ol' ? '[/ol]' : '[/ul]');
+      listType = currentType;
+      processedLines.push(listType === 'ol' ? '[ol]' : '[ul]');
+      const content = isUnorderedItem
+        ? line.replace(/^[-*] (.+)$/, '$1')
+        : line.replace(/^\d+\. (.+)$/, '$1');
+      processedLines.push('[li]' + content + '[/li]');
     } else if (!isListItem && inList) {
       // End of list
+      processedLines.push(listType === 'ol' ? '[/ol]' : '[/ul]');
       inList = false;
-      processedLines.push('[/list]');
+      listType = null;
       processedLines.push(line);
     } else {
       processedLines.push(line);
@@ -111,7 +134,7 @@ function markdownToBBCode(text) {
 
   // Close list if we ended while still in one
   if (inList) {
-    processedLines.push('[/list]');
+    processedLines.push(listType === 'ol' ? '[/ol]' : '[/ul]');
   }
 
   result = processedLines.join('\n');
@@ -220,7 +243,11 @@ class WorldAnvilClient {
             if (res.statusCode >= 200 && res.statusCode < 300) {
               resolve(parsed);
             } else {
-              reject(new Error(`API Error (${res.statusCode}): ${parsed.error || data}`));
+              // Properly serialize error objects for debugging
+              const errorMsg = parsed.error
+                ? (typeof parsed.error === 'object' ? JSON.stringify(parsed.error) : parsed.error)
+                : (typeof parsed === 'object' ? JSON.stringify(parsed) : data);
+              reject(new Error(`API Error (${res.statusCode}): ${errorMsg}`));
             }
           } catch (e) {
             if (res.statusCode >= 200 && res.statusCode < 300) {
@@ -614,7 +641,7 @@ const client = new WorldAnvilClient();
 const server = new Server(
   {
     name: 'worldanvil-mcp',
-    version: '1.1.0',
+    version: '1.2.0',
   },
   {
     capabilities: {
@@ -761,7 +788,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             template: {
               type: 'string',
-              description: 'The template type for the article (e.g., law, species, ethnicity, material)',
+              description: 'The template type for the article. Use "article" for generic articles, or specific types like: law, species, ethnicity, material, document, technology, organization, location, character, item, etc.',
             },
             content: {
               type: 'string',
