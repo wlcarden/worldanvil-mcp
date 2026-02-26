@@ -6,8 +6,10 @@
  * Provides MCP tools for interacting with the World Anvil API from Claude Code.
  *
  * Environment variables:
- *   WA_APP_KEY - World Anvil Application Key
- *   WA_AUTH_TOKEN - World Anvil User Authentication Token
+ *   WA_AUTH_TOKEN - World Anvil User Authentication Token (required)
+ *   WA_APP_KEY    - World Anvil Application Key (optional; required only for
+ *                   direct API mode. If omitted, the server uses proxy mode
+ *                   and the proxy injects the application key.)
  *
  * Changelog:
  *   v1.3.0 - Modular refactor, added Blocks/BlockFolders/Manuscripts, test infrastructure
@@ -22,12 +24,18 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { createServer } from './src/server.js';
 
 // Validate environment variables
+// WA_APP_KEY is optional: omitting it enables proxy mode, where the proxy
+// injects the application key. WA_AUTH_TOKEN is always required.
 const APP_KEY = process.env.WA_APP_KEY;
 const AUTH_TOKEN = process.env.WA_AUTH_TOKEN;
 
-if (!APP_KEY || !AUTH_TOKEN) {
-  console.error('Error: WA_APP_KEY and WA_AUTH_TOKEN environment variables must be set');
+if (!AUTH_TOKEN) {
+  console.error('Error: WA_AUTH_TOKEN environment variable must be set');
   process.exit(1);
+}
+
+if (!APP_KEY) {
+  console.error('Info: WA_APP_KEY not set — running in proxy mode');
 }
 
 /**
