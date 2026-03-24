@@ -256,11 +256,25 @@ export async function handleToolCall(name, args, client) {
       case 'worldanvil_list_timelines':
         return jsonResponse(await client.listTimelines(args.world_id, { offset: args.offset, limit: args.limit }));
 
-      case 'worldanvil_create_timeline':
-        return jsonResponse(await client.createTimeline({ title: args.title, world: { id: args.world_id } }));
+      case 'worldanvil_create_timeline': {
+        const data = { title: args.title, world: { id: args.world_id } };
+        if (args.description !== undefined) data.description = args.description;
+        if (args.type !== undefined) data.type = args.type;
+        if (args.state !== undefined) data.state = args.state;
+        if (args.tags !== undefined) data.tags = args.tags;
+        return jsonResponse(await client.createTimeline(data));
+      }
 
-      case 'worldanvil_update_timeline':
-        return jsonResponse(await client.updateTimeline(args.timeline_id, { title: args.title }));
+      case 'worldanvil_update_timeline': {
+        const data = {};
+        if (args.title !== undefined) data.title = args.title;
+        if (args.description !== undefined) data.description = args.description;
+        if (args.type !== undefined) data.type = args.type;
+        if (args.state !== undefined) data.state = args.state;
+        if (args.tags !== undefined) data.tags = args.tags;
+        if (args.history_ids !== undefined) data.histories = args.history_ids.map(id => ({ id }));
+        return jsonResponse(await client.updateTimeline(args.timeline_id, data));
+      }
 
       case 'worldanvil_delete_timeline':
         return jsonResponse(await client.deleteTimeline(args.timeline_id));
@@ -272,18 +286,63 @@ export async function handleToolCall(name, args, client) {
       case 'worldanvil_list_histories':
         return jsonResponse(await client.listHistories(args.world_id, { offset: args.offset, limit: args.limit }));
 
-      case 'worldanvil_create_history':
-        return jsonResponse(await client.createHistory({
+      case 'worldanvil_create_history': {
+        const data = {
           title: args.title,
           world: { id: args.world_id },
-          content: markdownToBBCode(args.content)
-        }));
+          year: String(args.year),
+        };
+        if (args.month !== undefined) data.month = args.month;
+        if (args.day !== undefined) data.day = args.day;
+        if (args.hour !== undefined) data.hour = args.hour;
+        if (args.endingYear !== undefined) data.endingYear = String(args.endingYear);
+        if (args.endingMonth !== undefined) data.endingMonth = args.endingMonth;
+        if (args.endingDay !== undefined) data.endingDay = args.endingDay;
+        if (args.endingHour !== undefined) data.endingHour = args.endingHour;
+        if (args.significance !== undefined) data.significance = args.significance;
+        if (args.state !== undefined) data.state = args.state;
+        if (args.tags !== undefined) data.tags = args.tags;
+        // content is the plain-text short summary — NOT converted to BBCode (unlike other handlers)
+        // fullcontent is the full body and does support BBCode
+        if (args.content !== undefined) data.content = args.content;
+        if (args.fullcontent !== undefined) data.fullcontent = markdownToBBCode(args.fullcontent);
+        if (args.displayDateName !== undefined) data.displayDateName = args.displayDateName;
+        if (args.displayRange !== undefined) data.displayRange = args.displayRange;
+        if (args.alternativeDisplayRange !== undefined) data.alternativeDisplayRange = args.alternativeDisplayRange;
+        if (args.article_id !== undefined) data.article = { id: args.article_id };
+        if (args.location_id !== undefined) data.location = { id: args.location_id };
+        if (args.character_ids !== undefined) data.characters = args.character_ids.map(id => ({ id }));
+        if (args.organization_ids !== undefined) data.organizations = args.organization_ids.map(id => ({ id }));
+        return jsonResponse(await client.createHistory(data));
+      }
 
-      case 'worldanvil_update_history':
-        return jsonResponse(await client.updateHistory(args.history_id, {
-          title: args.title,
-          content: markdownToBBCode(args.content)
-        }));
+      case 'worldanvil_update_history': {
+        const data = {};
+        if (args.title !== undefined) data.title = args.title;
+        if (args.year !== undefined) data.year = String(args.year);
+        if (args.month !== undefined) data.month = args.month;
+        if (args.day !== undefined) data.day = args.day;
+        if (args.hour !== undefined) data.hour = args.hour;
+        if (args.endingYear !== undefined) data.endingYear = String(args.endingYear);
+        if (args.endingMonth !== undefined) data.endingMonth = args.endingMonth;
+        if (args.endingDay !== undefined) data.endingDay = args.endingDay;
+        if (args.endingHour !== undefined) data.endingHour = args.endingHour;
+        if (args.significance !== undefined) data.significance = args.significance;
+        if (args.state !== undefined) data.state = args.state;
+        if (args.tags !== undefined) data.tags = args.tags;
+        // content is the plain-text short summary — NOT converted to BBCode (unlike other handlers)
+        // fullcontent is the full body and does support BBCode
+        if (args.content !== undefined) data.content = args.content;
+        if (args.fullcontent !== undefined) data.fullcontent = markdownToBBCode(args.fullcontent);
+        if (args.displayDateName !== undefined) data.displayDateName = args.displayDateName;
+        if (args.displayRange !== undefined) data.displayRange = args.displayRange;
+        if (args.alternativeDisplayRange !== undefined) data.alternativeDisplayRange = args.alternativeDisplayRange;
+        if (args.article_id !== undefined) data.article = { id: args.article_id };
+        if (args.location_id !== undefined) data.location = { id: args.location_id };
+        if (args.character_ids !== undefined) data.characters = args.character_ids.map(id => ({ id }));
+        if (args.organization_ids !== undefined) data.organizations = args.organization_ids.map(id => ({ id }));
+        return jsonResponse(await client.updateHistory(args.history_id, data));
+      }
 
       case 'worldanvil_delete_history':
         return jsonResponse(await client.deleteHistory(args.history_id));
