@@ -10,6 +10,7 @@
 
 import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest';
 import { handleToolCall } from '../src/handlers.js';
+import { WorldAnvilClient } from '../src/api-client.js';
 
 // ---------------------------------------------------------------------------
 // Mock client — records every method call for assertion
@@ -426,10 +427,13 @@ describe('History handlers', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Integration tests — real API calls, skipped without credentials
+// Integration tests — real API calls, skipped without both credentials
 // ---------------------------------------------------------------------------
 
-const hasCredentials = process.env.WA_APP_KEY && process.env.WA_AUTH_TOKEN;
+// Both WA_AUTH_TOKEN and WA_APP_KEY are required to run integration tests.
+// Proxy mode (WA_AUTH_TOKEN only) is not used here because the public proxy
+// may be blocked by WorldAnvil's Cloudflare protection, causing test flakiness.
+const hasCredentials = !!process.env.WA_AUTH_TOKEN && !!process.env.WA_APP_KEY;
 const TIMEOUT = 30000;
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const RATE_LIMIT_DELAY = 750;
@@ -437,17 +441,17 @@ const RATE_LIMIT_DELAY = 750;
 describe.skipIf(!hasCredentials)('Timeline & History Integration', () => {
   let client;
   let testWorldId;
+  // IDs shared across the ordered lifecycle tests
   let timelineId;
   let historyId;
 
   beforeAll(async () => {
-    const { WorldAnvilClient } = await import('../src/api-client.js');
     client = new WorldAnvilClient({
       appKey: process.env.WA_APP_KEY,
       authToken: process.env.WA_AUTH_TOKEN,
     });
 
-    // Use configured world or find existing [TEST] world
+    // Use configured world, or find/create a [TEST] world
     if (process.env.WA_TEST_WORLD_ID) {
       testWorldId = process.env.WA_TEST_WORLD_ID;
       return;
@@ -463,141 +467,145 @@ describe.skipIf(!hasCredentials)('Timeline & History Integration', () => {
     }
   }, TIMEOUT);
 
+  // Single 750ms pause between every test — no extra delays inside tests
+  // except where a write→read round-trip needs its own settle time.
   beforeEach(async () => {
     await delay(RATE_LIMIT_DELAY);
   });
 
-  describe('Timeline full lifecycle', () => {
-    it('creates a timeline with description and type', async () => {
-      const result = await client.createTimeline({
-        title: '[TEST] Age of Empires',
-        world: { id: testWorldId },
-        description: 'The rise and fall of the old empires.',
-        type: 'master',
-        state: 'private',
-        tags: 'test,empires',
-      });
-
-      expect(result.id).toBeDefined();
-      timelineId = result.id;
-    }, TIMEOUT);
-
-    it('updates a timeline with new description and type', async () => {
-      if (!timelineId) return;
-      await delay(RATE_LIMIT_DELAY);
-
-      await client.updateTimeline(timelineId, {
-        title: '[TEST] Age of Empires (Revised)',
-        description: 'Updated description.',
-        type: 'parallel',
-      });
-
-      await delay(RATE_LIMIT_DELAY);
-      const result = await client.getTimeline(timelineId);
-      expect(result.title).toBe('[TEST] Age of Empires (Revised)');
-    }, TIMEOUT);
-
-    it('attaches history events to timeline via update', async () => {
-      if (!timelineId || !historyId) return;
-
-      await client.updateTimeline(timelineId, {
-        histories: [{ id: historyId }],
-      });
-
-      await delay(RATE_LIMIT_DELAY);
-      const result = await client.getTimeline(timelineId);
-      // histories may be returned at granularity=2
-      const ids = (result.histories || []).map(h => h.id);
-      expect(ids).toContain(historyId);
-    }, TIMEOUT);
-  });
-
-  describe('History event full lifecycle', () => {
-    it('creates a history event with year, date, and full content', async () => {
-      await delay(RATE_LIMIT_DELAY);
-      const result = await client.createHistory({
-        title: '[TEST] The Great War',
-        world: { id: testWorldId },
-        year: '1247',
-        month: 6,
-        day: 15,
-        endingYear: '1250',
-        significance: 5,
-        state: 'private',
-        tags: 'test,war',
-        content: 'A brief summary of the conflict.',
-        fullcontent: '[b]The Great War[/b] reshaped the realm.',
-      });
-
-      expect(result.id).toBeDefined();
-      historyId = result.id;
-    }, TIMEOUT);
-
-    it('reads back the history event', async () => {
-      if (!historyId) return;
-      await delay(RATE_LIMIT_DELAY);
-
-      const result = await client.getHistory(historyId);
-      expect(result.id).toBe(historyId);
-      expect(result.title).toBe('[TEST] The Great War');
-    }, TIMEOUT);
-
-    it('updates title and date fields', async () => {
-      if (!historyId) return;
-      await delay(RATE_LIMIT_DELAY);
-
-      await client.updateHistory(historyId, {
-        title: '[TEST] The Great War (Updated)',
-        month: 7,
-        significance: 4,
-      });
-
-      await delay(RATE_LIMIT_DELAY);
-      const result = await client.getHistory(historyId);
-      expect(result.title).toBe('[TEST] The Great War (Updated)');
-    }, TIMEOUT);
-
-    it('appears in world history listing', async () => {
-      if (!historyId) return;
-      await delay(RATE_LIMIT_DELAY);
-
-      const result = await client.listHistories(testWorldId);
-      expect(result.entities).toBeDefined();
-      const found = result.entities.find(h => h.id === historyId);
-      expect(found).toBeDefined();
-    }, TIMEOUT);
-
-    it('deletes the history event', async () => {
-      if (!historyId) return;
-      await delay(RATE_LIMIT_DELAY);
-
-      await client.deleteHistory(historyId);
-      await delay(RATE_LIMIT_DELAY);
-
-      const list = await client.listHistories(testWorldId);
-      const found = list.entities.find(h => h.id === historyId);
-      expect(found).toBeUndefined();
-      historyId = null;
-    }, TIMEOUT);
-  });
-
   afterAll(async () => {
-    // Clean up timeline if it was created
-    if (timelineId) {
-      await delay(RATE_LIMIT_DELAY);
-      try { await client.deleteTimeline(timelineId); } catch { /* ignore */ }
-    }
-    // Clean up stray history event if delete test didn't run
+    // Safety-net cleanup: delete anything the ordered tests didn't already clean up.
     if (historyId) {
       await delay(RATE_LIMIT_DELAY);
       try { await client.deleteHistory(historyId); } catch { /* ignore */ }
     }
+    if (timelineId) {
+      await delay(RATE_LIMIT_DELAY);
+      try { await client.deleteTimeline(timelineId); } catch { /* ignore */ }
+    }
+  }, TIMEOUT);
+
+  // -----------------------------------------------------------------------
+  // Ordered lifecycle — tests run sequentially and share timelineId/historyId
+  // -----------------------------------------------------------------------
+
+  it('creates a timeline with description, type, state, and tags', async () => {
+    const result = await client.createTimeline({
+      title: '[TEST] Age of Empires',
+      world: { id: testWorldId },
+      description: 'The rise and fall of the old empires.',
+      type: 'master',
+      state: 'private',
+      tags: 'test,empires',
+    });
+
+    expect(result.id).toBeDefined();
+    timelineId = result.id;
+  }, TIMEOUT);
+
+  it('updates timeline description and type', async () => {
+    expect(timelineId).toBeDefined();
+
+    await client.updateTimeline(timelineId, {
+      title: '[TEST] Age of Empires (Revised)',
+      description: 'Updated description.',
+      type: 'parallel',
+    });
+
+    await delay(RATE_LIMIT_DELAY); // settle before read
+    const result = await client.getTimeline(timelineId);
+    expect(result.title).toBe('[TEST] Age of Empires (Revised)');
+  }, TIMEOUT);
+
+  it('creates a history event with year, date range, significance, and full content', async () => {
+    expect(testWorldId).toBeDefined();
+
+    const result = await client.createHistory({
+      title: '[TEST] The Great War',
+      world: { id: testWorldId },
+      year: '1247',
+      month: 6,
+      day: 15,
+      endingYear: '1250',
+      significance: 5,
+      state: 'private',
+      tags: 'test,war',
+      content: 'A brief summary of the conflict.',
+      fullcontent: '[b]The Great War[/b] reshaped the realm.',
+    });
+
+    expect(result.id).toBeDefined();
+    historyId = result.id;
+  }, TIMEOUT);
+
+  it('reads back the history event', async () => {
+    expect(historyId).toBeDefined();
+
+    const result = await client.getHistory(historyId);
+    expect(result.id).toBe(historyId);
+    expect(result.title).toBe('[TEST] The Great War');
+  }, TIMEOUT);
+
+  it('attaches history event to timeline via history_ids replace', async () => {
+    expect(timelineId).toBeDefined();
+    expect(historyId).toBeDefined();
+
+    await client.updateTimeline(timelineId, {
+      histories: [{ id: historyId }],
+    });
+
+    await delay(RATE_LIMIT_DELAY); // settle before read
+    const result = await client.getTimeline(timelineId);
+    const ids = (result.histories || []).map(h => h.id);
+    expect(ids).toContain(historyId);
+  }, TIMEOUT);
+
+  it('updates history event title and date fields', async () => {
+    expect(historyId).toBeDefined();
+
+    await client.updateHistory(historyId, {
+      title: '[TEST] The Great War (Updated)',
+      month: 7,
+      significance: 4,
+    });
+
+    await delay(RATE_LIMIT_DELAY); // settle before read
+    const result = await client.getHistory(historyId);
+    expect(result.title).toBe('[TEST] The Great War (Updated)');
+  }, TIMEOUT);
+
+  it('history event appears in world listing', async () => {
+    expect(historyId).toBeDefined();
+
+    const result = await client.listHistories(testWorldId);
+    expect(result.entities).toBeDefined();
+    const found = result.entities.find(h => h.id === historyId);
+    expect(found).toBeDefined();
+  }, TIMEOUT);
+
+  it('deletes the history event', async () => {
+    expect(historyId).toBeDefined();
+
+    await client.deleteHistory(historyId);
+
+    await delay(RATE_LIMIT_DELAY); // settle before read
+    const list = await client.listHistories(testWorldId);
+    const found = list.entities.find(h => h.id === historyId);
+    expect(found).toBeUndefined();
+    historyId = null; // mark clean so afterAll skips it
+  }, TIMEOUT);
+
+  it('deletes the timeline', async () => {
+    expect(timelineId).toBeDefined();
+
+    await client.deleteTimeline(timelineId);
+    timelineId = null; // mark clean so afterAll skips it
   }, TIMEOUT);
 });
 
 describe.runIf(!hasCredentials)('Timeline & History Integration (Skipped)', () => {
-  it('requires WA_APP_KEY and WA_AUTH_TOKEN environment variables', () => {
-    console.log('\n  Integration tests skipped - no credentials provided\n');
+  it('requires WA_AUTH_TOKEN and WA_APP_KEY environment variables', () => {
+    console.log('\n  Integration tests skipped - WA_AUTH_TOKEN and WA_APP_KEY must both be set\n');
     expect(true).toBe(true);
   });
 });

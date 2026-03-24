@@ -302,6 +302,8 @@ export async function handleToolCall(name, args, client) {
         if (args.significance !== undefined) data.significance = args.significance;
         if (args.state !== undefined) data.state = args.state;
         if (args.tags !== undefined) data.tags = args.tags;
+        // content is the plain-text short summary — NOT converted to BBCode (unlike other handlers)
+        // fullcontent is the full body and does support BBCode
         if (args.content !== undefined) data.content = args.content;
         if (args.fullcontent !== undefined) data.fullcontent = markdownToBBCode(args.fullcontent);
         if (args.displayDateName !== undefined) data.displayDateName = args.displayDateName;
@@ -328,6 +330,8 @@ export async function handleToolCall(name, args, client) {
         if (args.significance !== undefined) data.significance = args.significance;
         if (args.state !== undefined) data.state = args.state;
         if (args.tags !== undefined) data.tags = args.tags;
+        // content is the plain-text short summary — NOT converted to BBCode (unlike other handlers)
+        // fullcontent is the full body and does support BBCode
         if (args.content !== undefined) data.content = args.content;
         if (args.fullcontent !== undefined) data.fullcontent = markdownToBBCode(args.fullcontent);
         if (args.displayDateName !== undefined) data.displayDateName = args.displayDateName;

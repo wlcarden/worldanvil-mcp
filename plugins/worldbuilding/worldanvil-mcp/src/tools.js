@@ -286,7 +286,7 @@ export function getToolDefinitions() {
           type: { type: 'string', enum: ['parallel', 'master'], description: 'Timeline type' },
           state: { type: 'string', enum: ['public', 'private'], description: 'Visibility state' },
           tags: { type: 'string', description: 'Comma-separated tags' },
-          history_ids: { type: 'array', items: { type: 'string' }, description: 'IDs of history events to attach to this timeline' },
+          history_ids: { type: 'array', items: { type: 'string' }, description: 'IDs of history events on this timeline. Replaces the full list — include all existing IDs alongside any new ones to avoid losing previously attached events.' },
         },
         required: ['timeline_id'],
       },
