@@ -919,13 +919,17 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               type: 'string',
               description: 'The ID of the world to create the category in',
             },
+            description: {
+              type: 'string',
+              description: 'The description/content displayed on the category page (optional). Markdown is automatically converted to BBCode.',
+            },
           },
           required: ['title', 'world_id'],
         },
       },
       {
         name: 'worldanvil_update_category',
-        description: 'Update an existing category in WorldAnvil',
+        description: 'Update an existing category in WorldAnvil. Markdown content is automatically converted to BBCode.',
         inputSchema: {
           type: 'object',
           properties: {
@@ -936,6 +940,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             title: {
               type: 'string',
               description: 'The new title of the category (optional)',
+            },
+            description: {
+              type: 'string',
+              description: 'The description/content displayed on the category page (optional). Markdown is automatically converted to BBCode.',
             },
           },
           required: ['category_id'],
@@ -1251,6 +1259,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           title: args.title,
           world: { id: args.world_id },  // WorldAnvil API expects nested object format
         };
+        if (args.description !== undefined) data.description = markdownToBBCode(args.description);
         const result = await client.createCategory(data);
         return {
           content: [
@@ -1265,6 +1274,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case 'worldanvil_update_category': {
         const data = {};
         if (args.title !== undefined) data.title = args.title;
+        if (args.description !== undefined) data.description = markdownToBBCode(args.description);
 
         const result = await client.updateCategory(args.category_id, data);
         return {
