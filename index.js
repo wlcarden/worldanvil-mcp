@@ -10,6 +10,12 @@
  *   WA_AUTH_TOKEN - World Anvil User Authentication Token
  *
  * Changelog:
+ *   v1.5.0 - Added Variable and Variable Collection CRUD operations
+ *            (list, get, create, update, delete for both collections and variables)
+ *   v1.4.0 - Fixed list_articles to return ALL articles instead of only uncategorized
+ *            (removed default category: { id: "-1" } filter, increased default limit to 100)
+ *   v1.3.0 - Added granularity=2 to all GET endpoints for full content/relationships
+ *            (fixes missing 'content' field issue for articles)
  *   v1.2.0 - Improved template docs (use "article" not "generic"), better error messages,
  *            added ordered list support to BBCode converter
  *   v1.1.1 - Fixed PATCH endpoints to use query params (was causing 404 errors)
@@ -292,26 +298,29 @@ class WorldAnvilClient {
 
   /**
    * Get a specific world by ID
+   * Uses granularity=2 for full data with all relationships
    */
   async getWorld(worldId) {
-    return this.request(`/world?id=${worldId}`);
+    return this.request(`/world?id=${worldId}&granularity=2`);
   }
 
   /**
    * List articles in a world
+   *
+   * Note: If category is not specified, returns ALL articles across all categories.
+   * Use category: { id: "-1" } to get only uncategorized articles.
    */
   async listArticles(worldId, options = {}) {
     // Build request body with defaults from Swagger spec
     const body = {
-      limit: options.limit !== undefined ? String(options.limit) : "50",
+      limit: options.limit !== undefined ? String(options.limit) : "100",
       offset: options.offset !== undefined ? String(options.offset) : "0"
     };
 
-    // Category is optional, defaults to uncategorized ("-1") if not specified
+    // Only include category if explicitly provided
+    // Omitting category returns ALL articles regardless of categorization
     if (options.category !== undefined) {
       body.category = options.category;
-    } else {
-      body.category = { id: "-1" };
     }
 
     return this.request(`/world/articles?id=${worldId}`, 'POST', body);
@@ -319,9 +328,10 @@ class WorldAnvilClient {
 
   /**
    * Get a specific article
+   * Uses granularity=2 to get full content including vignette (content field)
    */
   async getArticle(articleId) {
-    return this.request(`/article?id=${articleId}`);
+    return this.request(`/article?id=${articleId}&granularity=2`);
   }
 
   /**
@@ -353,9 +363,10 @@ class WorldAnvilClient {
 
   /**
    * Get a specific category
+   * Uses granularity=2 for full data with all relationships
    */
   async getCategory(categoryId) {
-    return this.request(`/category?id=${categoryId}`);
+    return this.request(`/category?id=${categoryId}&granularity=2`);
   }
 
   /**
@@ -422,7 +433,7 @@ class WorldAnvilClient {
 
   // ===== NOTEBOOKS =====
   async getNotebook(notebookId) {
-    return this.request(`/notebook?id=${notebookId}`);
+    return this.request(`/notebook?id=${notebookId}&granularity=2`);
   }
 
   async listNotebooks(worldId, options = {}) {
@@ -447,7 +458,7 @@ class WorldAnvilClient {
 
   // ===== NOTE SECTIONS =====
   async getNotesection(notesectionId) {
-    return this.request(`/notesection?id=${notesectionId}`);
+    return this.request(`/notesection?id=${notesectionId}&granularity=2`);
   }
 
   async listNotesections(notebookId, options = {}) {
@@ -472,7 +483,7 @@ class WorldAnvilClient {
 
   // ===== NOTES =====
   async getNote(noteId) {
-    return this.request(`/note?id=${noteId}`);
+    return this.request(`/note?id=${noteId}&granularity=2`);
   }
 
   async listNotes(notesectionId, options = {}) {
@@ -497,7 +508,7 @@ class WorldAnvilClient {
 
   // ===== SECRETS =====
   async getSecret(secretId) {
-    return this.request(`/secret?id=${secretId}`);
+    return this.request(`/secret?id=${secretId}&granularity=2`);
   }
 
   async listSecrets(worldId, options = {}) {
@@ -522,7 +533,7 @@ class WorldAnvilClient {
 
   // ===== MAPS =====
   async getMap(mapId) {
-    return this.request(`/map?id=${mapId}`);
+    return this.request(`/map?id=${mapId}&granularity=2`);
   }
 
   async listMaps(worldId, options = {}) {
@@ -547,7 +558,7 @@ class WorldAnvilClient {
 
   // ===== MAP MARKERS =====
   async getMarker(markerId) {
-    return this.request(`/marker?id=${markerId}`);
+    return this.request(`/marker?id=${markerId}&granularity=2`);
   }
 
   async listMarkers(mapId, options = {}) {
@@ -572,7 +583,7 @@ class WorldAnvilClient {
 
   // ===== TIMELINES =====
   async getTimeline(timelineId) {
-    return this.request(`/timeline?id=${timelineId}`);
+    return this.request(`/timeline?id=${timelineId}&granularity=2`);
   }
 
   async listTimelines(worldId, options = {}) {
@@ -597,7 +608,7 @@ class WorldAnvilClient {
 
   // ===== HISTORY EVENTS =====
   async getHistory(historyId) {
-    return this.request(`/history?id=${historyId}`);
+    return this.request(`/history?id=${historyId}&granularity=2`);
   }
 
   async listHistories(worldId, options = {}) {
@@ -618,6 +629,56 @@ class WorldAnvilClient {
 
   async deleteHistory(historyId) {
     return this.request(`/history?id=${historyId}`, 'DELETE');
+  }
+
+  // ===== VARIABLE COLLECTIONS =====
+  async getVariableCollection(collectionId) {
+    return this.request(`/variablecollection?id=${collectionId}&granularity=2`);
+  }
+
+  async listVariableCollections(worldId, options = {}) {
+    const body = {
+      limit: options.limit !== undefined ? String(options.limit) : "50",
+      offset: options.offset !== undefined ? String(options.offset) : "0"
+    };
+    return this.request(`/world/variablecollections?id=${worldId}`, 'POST', body);
+  }
+
+  async createVariableCollection(data) {
+    return this.request('/variablecollection', 'PUT', data);
+  }
+
+  async updateVariableCollection(collectionId, data) {
+    return this.request(`/variablecollection?id=${collectionId}`, 'PATCH', data);
+  }
+
+  async deleteVariableCollection(collectionId) {
+    return this.request(`/variablecollection?id=${collectionId}`, 'DELETE');
+  }
+
+  // ===== VARIABLES =====
+  async getVariable(variableId) {
+    return this.request(`/variable?id=${variableId}&granularity=2`);
+  }
+
+  async listVariables(collectionId, options = {}) {
+    const body = {
+      limit: options.limit !== undefined ? String(options.limit) : "50",
+      offset: options.offset !== undefined ? String(options.offset) : "0"
+    };
+    return this.request(`/variablecollection/variables?id=${collectionId}`, 'POST', body);
+  }
+
+  async createVariable(data) {
+    return this.request('/variable', 'PUT', data);
+  }
+
+  async updateVariable(variableId, data) {
+    return this.request(`/variable?id=${variableId}`, 'PATCH', data);
+  }
+
+  async deleteVariable(variableId) {
+    return this.request(`/variable?id=${variableId}`, 'DELETE');
   }
 
   // ===== RPG SYSTEMS =====
@@ -641,7 +702,7 @@ const client = new WorldAnvilClient();
 const server = new Server(
   {
     name: 'worldanvil-mcp',
-    version: '1.2.0',
+    version: '1.4.0',
   },
   {
     capabilities: {
@@ -997,6 +1058,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       { name: 'worldanvil_update_history', description: 'Update history event', inputSchema: { type: 'object', properties: { history_id: { type: 'string' }, title: { type: 'string' }, content: { type: 'string' } }, required: ['history_id'] } },
       { name: 'worldanvil_delete_history', description: 'Delete history event', inputSchema: { type: 'object', properties: { history_id: { type: 'string' } }, required: ['history_id'] } },
 
+      // VARIABLE COLLECTIONS
+      { name: 'worldanvil_get_variable_collection', description: 'Get a variable collection by ID', inputSchema: { type: 'object', properties: { collection_id: { type: 'string', description: 'The ID of the variable collection' } }, required: ['collection_id'] } },
+      { name: 'worldanvil_list_variable_collections', description: 'List variable collections in a world', inputSchema: { type: 'object', properties: { world_id: { type: 'string', description: 'The ID of the world' }, offset: { type: 'number' }, limit: { type: 'number' } }, required: ['world_id'] } },
+      { name: 'worldanvil_create_variable_collection', description: 'Create a new variable collection. Required: title and world_id.', inputSchema: { type: 'object', properties: { title: { type: 'string', description: 'Collection name (also used as embed prefix)' }, world_id: { type: 'string', description: 'The ID of the world' }, description: { type: 'string', description: 'Optional description' } }, required: ['title', 'world_id'] } },
+      { name: 'worldanvil_update_variable_collection', description: 'Update a variable collection', inputSchema: { type: 'object', properties: { collection_id: { type: 'string', description: 'The ID of the collection to update' }, title: { type: 'string' }, description: { type: 'string' } }, required: ['collection_id'] } },
+      { name: 'worldanvil_delete_variable_collection', description: 'Delete a variable collection and all its variables', inputSchema: { type: 'object', properties: { collection_id: { type: 'string', description: 'The ID of the collection to delete' } }, required: ['collection_id'] } },
+
+      // VARIABLES
+      { name: 'worldanvil_get_variable', description: 'Get a variable by ID', inputSchema: { type: 'object', properties: { variable_id: { type: 'string', description: 'The ID of the variable' } }, required: ['variable_id'] } },
+      { name: 'worldanvil_list_variables', description: 'List variables in a collection', inputSchema: { type: 'object', properties: { collection_id: { type: 'string', description: 'The ID of the variable collection' }, offset: { type: 'number' }, limit: { type: 'number' } }, required: ['collection_id'] } },
+      { name: 'worldanvil_create_variable', description: 'Create a new variable. Types: "string" (inline text/BBCode), "term" (hover tooltip), "link" (clickable URL). Embed in articles using var:collection-prefix-key syntax.', inputSchema: { type: 'object', properties: { collection_id: { type: 'string', description: 'The ID of the variable collection' }, world_id: { type: 'string', description: 'The ID of the world' }, key: { type: 'string', description: 'Variable key (used in embed syntax)' }, value: { type: 'string', description: 'Variable value (BBCode for string type, tooltip text for term type, URL for link type)' }, type: { type: 'string', description: 'Variable type: "string" (inline content), "term" (hover tooltip), or "link" (URL)', enum: ['string', 'term', 'link'] } }, required: ['collection_id', 'world_id', 'key', 'value', 'type'] } },
+      { name: 'worldanvil_update_variable', description: 'Update an existing variable', inputSchema: { type: 'object', properties: { variable_id: { type: 'string', description: 'The ID of the variable to update' }, key: { type: 'string', description: 'New key' }, value: { type: 'string', description: 'New value' } }, required: ['variable_id'] } },
+      { name: 'worldanvil_delete_variable', description: 'Delete a variable', inputSchema: { type: 'object', properties: { variable_id: { type: 'string', description: 'The ID of the variable to delete' } }, required: ['variable_id'] } },
+
       // RPG SYSTEMS
       { name: 'worldanvil_get_rpgsystem', description: 'Get RPG system by ID', inputSchema: { type: 'object', properties: { rpgsystem_id: { type: 'string', description: 'RPG system ID' } }, required: ['rpgsystem_id'] } },
       { name: 'worldanvil_list_rpgsystems', description: 'List all RPG systems', inputSchema: { type: 'object', properties: { offset: { type: 'number' }, limit: { type: 'number' } } } },
@@ -1311,6 +1386,43 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case 'worldanvil_create_history': return { content: [{ type: 'text', text: JSON.stringify(await client.createHistory({ title: args.title, world: { id: args.world_id }, content: markdownToBBCode(args.content) }), null, 2) }] };
       case 'worldanvil_update_history': return { content: [{ type: 'text', text: JSON.stringify(await client.updateHistory(args.history_id, { title: args.title, content: markdownToBBCode(args.content) }), null, 2) }] };
       case 'worldanvil_delete_history': return { content: [{ type: 'text', text: JSON.stringify(await client.deleteHistory(args.history_id), null, 2) }] };
+
+      // VARIABLE COLLECTIONS
+      case 'worldanvil_get_variable_collection': return { content: [{ type: 'text', text: JSON.stringify(await client.getVariableCollection(args.collection_id), null, 2) }] };
+      case 'worldanvil_list_variable_collections': return { content: [{ type: 'text', text: JSON.stringify(await client.listVariableCollections(args.world_id, { offset: args.offset, limit: args.limit }), null, 2) }] };
+      case 'worldanvil_create_variable_collection': {
+        const data = { title: args.title, world: { id: args.world_id } };
+        if (args.description !== undefined) data.description = args.description;
+        return { content: [{ type: 'text', text: JSON.stringify(await client.createVariableCollection(data), null, 2) }] };
+      }
+      case 'worldanvil_update_variable_collection': {
+        const data = {};
+        if (args.title !== undefined) data.title = args.title;
+        if (args.description !== undefined) data.description = args.description;
+        return { content: [{ type: 'text', text: JSON.stringify(await client.updateVariableCollection(args.collection_id, data), null, 2) }] };
+      }
+      case 'worldanvil_delete_variable_collection': return { content: [{ type: 'text', text: JSON.stringify(await client.deleteVariableCollection(args.collection_id), null, 2) }] };
+
+      // VARIABLES
+      case 'worldanvil_get_variable': return { content: [{ type: 'text', text: JSON.stringify(await client.getVariable(args.variable_id), null, 2) }] };
+      case 'worldanvil_list_variables': return { content: [{ type: 'text', text: JSON.stringify(await client.listVariables(args.collection_id, { offset: args.offset, limit: args.limit }), null, 2) }] };
+      case 'worldanvil_create_variable': {
+        const data = {
+          collection: { id: args.collection_id },
+          world: { id: args.world_id },
+          k: args.key,
+          v: args.value,
+          type: args.type
+        };
+        return { content: [{ type: 'text', text: JSON.stringify(await client.createVariable(data), null, 2) }] };
+      }
+      case 'worldanvil_update_variable': {
+        const data = {};
+        if (args.key !== undefined) data.k = args.key;
+        if (args.value !== undefined) data.v = args.value;
+        return { content: [{ type: 'text', text: JSON.stringify(await client.updateVariable(args.variable_id, data), null, 2) }] };
+      }
+      case 'worldanvil_delete_variable': return { content: [{ type: 'text', text: JSON.stringify(await client.deleteVariable(args.variable_id), null, 2) }] };
 
       // RPG SYSTEMS
       case 'worldanvil_get_rpgsystem': return { content: [{ type: 'text', text: JSON.stringify(await client.getRpgSystem(args.rpgsystem_id), null, 2) }] };
