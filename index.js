@@ -1198,15 +1198,15 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       // BLOCKS (Statblock Instances)
       { name: 'worldanvil_get_block', description: 'Get a statblock by ID', inputSchema: { type: 'object', properties: { block_id: { type: 'string', description: 'Block/statblock ID' } }, required: ['block_id'] } },
       { name: 'worldanvil_list_blocks', description: 'List statblocks in a folder', inputSchema: { type: 'object', properties: { folder_id: { type: 'string', description: 'Block folder ID' }, offset: { type: 'number' }, limit: { type: 'number' } }, required: ['folder_id'] } },
-      { name: 'worldanvil_create_block', description: 'Create a statblock instance from a template. Use dataParser (YAML), textualdata, tabulardata, or jsondata to populate field values.', inputSchema: { type: 'object', properties: { title: { type: 'string', description: 'Statblock name' }, template_id: { type: 'number', description: 'Block template ID to use' }, folder_id: { type: 'string', description: 'Block folder ID (optional)' }, state: { type: 'string', description: 'Visibility: "public" or "private"', enum: ['public', 'private'] }, tags: { type: 'string', description: 'Tags (e.g. "#material,#metal")' }, dataParser: { type: 'string', description: 'YAML-formatted field data matching template parts' }, textualdata: { type: 'string', description: 'Text field data' }, tabulardata: { type: 'string', description: 'Tabular field data' }, jsondata: { type: 'string', description: 'JSON-formatted field data' } }, required: ['title', 'template_id'] } },
+      { name: 'worldanvil_create_block', description: 'Create a statblock instance from a template. Use jsondata (JSON string of field key-value pairs) to populate field values. dataParser is a format indicator (e.g. "yaml"), not the data itself.', inputSchema: { type: 'object', properties: { title: { type: 'string', description: 'Statblock name' }, template_id: { type: 'number', description: 'Block template ID to use' }, folder_id: { type: 'string', description: 'Block folder ID (optional)' }, world_id: { type: 'string', description: 'World ID (optional)' }, state: { type: 'string', description: 'Visibility: "public" or "private"', enum: ['public', 'private'] }, tags: { type: 'string', description: 'Tags (e.g. "#material,#metal")' }, dataParser: { type: 'string', description: 'Data format indicator (e.g. "yaml" or "json")' }, textualdata: { type: 'string', description: 'Text field data' }, tabulardata: { type: 'string', description: 'Tabular field data' }, jsondata: { type: 'string', description: 'JSON string of field data matching template part titles' } }, required: ['title', 'template_id'] } },
       { name: 'worldanvil_update_block', description: 'Update a statblock. Can update title, state, tags, and field data.', inputSchema: { type: 'object', properties: { block_id: { type: 'string', description: 'Block/statblock ID' }, title: { type: 'string' }, state: { type: 'string', enum: ['public', 'private'] }, tags: { type: 'string' }, dataParser: { type: 'string', description: 'YAML-formatted field data' }, textualdata: { type: 'string' }, tabulardata: { type: 'string' }, jsondata: { type: 'string' }, folder_id: { type: 'string', description: 'Move to different folder' } }, required: ['block_id'] } },
       { name: 'worldanvil_delete_block', description: 'Delete a statblock. This action is irreversible.', inputSchema: { type: 'object', properties: { block_id: { type: 'string', description: 'Block/statblock ID' } }, required: ['block_id'] } },
 
       // BLOCK TEMPLATES (Statblock Template Definitions)
       { name: 'worldanvil_get_block_template', description: 'Get a statblock template by ID. Use granularity=2 to include template parts.', inputSchema: { type: 'object', properties: { template_id: { type: 'number', description: 'Block template ID' } }, required: ['template_id'] } },
       { name: 'worldanvil_list_block_templates', description: 'List statblock templates owned by the current user', inputSchema: { type: 'object', properties: { offset: { type: 'number' }, limit: { type: 'number' } } } },
-      { name: 'worldanvil_create_block_template', description: 'Create a new statblock template', inputSchema: { type: 'object', properties: { title: { type: 'string', description: 'Template name' }, description: { type: 'string', description: 'Template description' } }, required: ['title'] } },
-      { name: 'worldanvil_update_block_template', description: 'Update a statblock template', inputSchema: { type: 'object', properties: { template_id: { type: 'string', description: 'Block template ID' }, title: { type: 'string' }, description: { type: 'string' } }, required: ['template_id'] } },
+      { name: 'worldanvil_create_block_template', description: 'Create a new statblock template. Requires an RPG system ID (use list_rpgsystems to find one). Automatically constructs the required formSchema.', inputSchema: { type: 'object', properties: { title: { type: 'string', description: 'Template name' }, description: { type: 'string', description: 'Template description' }, rpg_system_id: { type: 'number', description: 'RPG system ID (required). Use 208 for Homebrew/In Development, or 141 for Generic.' } }, required: ['title', 'rpg_system_id'] } },
+      { name: 'worldanvil_update_block_template', description: 'Update a statblock template. Use formSchema to define fields accessible via variables.* in TWIG.', inputSchema: { type: 'object', properties: { template_id: { type: 'string', description: 'Block template ID' }, title: { type: 'string' }, description: { type: 'string' }, formSchema: { type: 'string', description: 'JSON string defining the template schema including fields. Fields become variables.fieldname in TWIG.' } }, required: ['template_id'] } },
       { name: 'worldanvil_delete_block_template', description: 'Delete a statblock template and ALL its parts. Irreversible.', inputSchema: { type: 'object', properties: { template_id: { type: 'string', description: 'Block template ID' } }, required: ['template_id'] } },
 
       // BLOCK TEMPLATE PARTS (Statblock Field Definitions)
@@ -1591,7 +1591,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case 'worldanvil_list_blocks': return { content: [{ type: 'text', text: JSON.stringify(await client.listBlocks(args.folder_id, { offset: args.offset, limit: args.limit }), null, 2) }] };
       case 'worldanvil_create_block': {
         const data = { title: args.title, template: { id: args.template_id } };
-        if (args.folder_id !== undefined) data.folder = { id: args.folder_id };
+        if (args.folder_id !== undefined) data.blockfolder = { id: Number(args.folder_id) };
+        if (args.world_id !== undefined) data.world = { id: args.world_id };
         if (args.state !== undefined) data.state = args.state;
         if (args.tags !== undefined) data.tags = args.tags;
         if (args.dataParser !== undefined) data.dataParser = args.dataParser;
@@ -1618,7 +1619,31 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case 'worldanvil_get_block_template': return { content: [{ type: 'text', text: JSON.stringify(await client.getBlockTemplate(args.template_id), null, 2) }] };
       case 'worldanvil_list_block_templates': return { content: [{ type: 'text', text: JSON.stringify(await client.listBlockTemplates({ offset: args.offset, limit: args.limit }), null, 2) }] };
       case 'worldanvil_create_block_template': {
-        const data = { title: args.title };
+        const identity = await client.getIdentity();
+        const slug = args.title.toLowerCase().replace(/[^a-z0-9]+/g, '_') + '-' + identity.username.toLowerCase().replace(/[^a-z0-9]+/g, '_') + '-' + args.rpg_system_id;
+        const formSchema = JSON.stringify({
+          version: "1",
+          system: "custom",
+          author: { username: identity.username || "Unknown" },
+          unique_reference: slug,
+          name: args.title,
+          display_template: "",
+          description: args.description || "",
+          fields: {
+            name: {
+              input: "string",
+              label: "Name",
+              placeholder: "The name of the " + args.title,
+              required: true
+            }
+          }
+        });
+        const data = {
+          title: args.title,
+          formSchemaParser: "json",
+          formSchema: formSchema,
+          RPGSRD: { id: args.rpg_system_id }
+        };
         if (args.description !== undefined) data.description = args.description;
         return { content: [{ type: 'text', text: JSON.stringify(await client.createBlockTemplate(data), null, 2) }] };
       }
@@ -1626,6 +1651,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const data = {};
         if (args.title !== undefined) data.title = args.title;
         if (args.description !== undefined) data.description = args.description;
+        if (args.formSchema !== undefined) {
+          data.formSchemaParser = "json";
+          data.formSchema = args.formSchema;
+        }
         return { content: [{ type: 'text', text: JSON.stringify(await client.updateBlockTemplate(args.template_id, data), null, 2) }] };
       }
       case 'worldanvil_delete_block_template': return { content: [{ type: 'text', text: JSON.stringify(await client.deleteBlockTemplate(args.template_id), null, 2) }] };
