@@ -4,12 +4,12 @@
  * HTTP client for World Anvil Boromir API.
  */
 
-import https from 'https';
+import https from "https";
 
 // Configuration defaults
-const DEFAULT_API_BASE = 'www.worldanvil.com';
-const DEFAULT_API_PATH = '/api/external/boromir';
-const DEFAULT_PROXY_URL = 'https://worldanvil-proxy.wlcarden.workers.dev';
+const DEFAULT_API_BASE = "www.worldanvil.com";
+const DEFAULT_API_PATH = "/api/external/boromir";
+const DEFAULT_PROXY_URL = "https://worldanvil-proxy.onrender.com";
 
 /**
  * World Anvil API Client
@@ -35,7 +35,7 @@ export class WorldAnvilClient {
 
     // Check for authToken first - always required
     if (!this.authToken) {
-      throw new Error('WA_AUTH_TOKEN is required');
+      throw new Error("WA_AUTH_TOKEN is required");
     }
 
     // Determine mode: direct (with appKey) or proxy (with proxyUrl)
@@ -52,7 +52,7 @@ export class WorldAnvilClient {
       // Proxy mode - parse proxyUrl, proxy will inject appKey
       this.appKey = undefined;
       // Normalize URL: strip trailing slash
-      const normalizedUrl = proxyUrl.replace(/\/$/, '');
+      const normalizedUrl = proxyUrl.replace(/\/$/, "");
       this.proxyUrl = normalizedUrl;
 
       // Parse proxy URL to extract hostname
@@ -60,9 +60,9 @@ export class WorldAnvilClient {
         const parsed = new URL(normalizedUrl);
         this.apiBase = parsed.hostname;
         // Proxy handles the /api/external/boromir path prefix
-        this.apiPath = '';
+        this.apiPath = "";
         // Store protocol for request (http vs https)
-        this.useHttps = parsed.protocol === 'https:';
+        this.useHttps = parsed.protocol === "https:";
       } catch (e) {
         throw new Error(`Invalid WA_PROXY_URL: ${proxyUrl}`);
       }
@@ -74,8 +74,8 @@ export class WorldAnvilClient {
       // Parse default proxy URL
       const parsed = new URL(DEFAULT_PROXY_URL);
       this.apiBase = parsed.hostname;
-      this.apiPath = '';
-      this.useHttps = parsed.protocol === 'https:';
+      this.apiPath = "";
+      this.useHttps = parsed.protocol === "https:";
     }
   }
 
@@ -87,42 +87,42 @@ export class WorldAnvilClient {
    * @param {Object} [body=null] - Request body for POST/PUT/PATCH
    * @returns {Promise<Object>} API response
    */
-  async request(endpoint, method = 'GET', body = null) {
+  async request(endpoint, method = "GET", body = null) {
     return new Promise((resolve, reject) => {
-      const postData = body ? JSON.stringify(body) : '';
+      const postData = body ? JSON.stringify(body) : "";
 
       // Build headers - only include x-application-key in direct mode
       const headers = {
-        'x-auth-token': this.authToken,
-        'Accept': 'application/json',
-        'User-Agent': 'WorldAnvil-MCP/1.0'
+        "x-auth-token": this.authToken,
+        Accept: "application/json",
+        "User-Agent": "WorldAnvil-MCP/1.0",
       };
 
       // Only add app key header in direct mode (proxy injects it)
       if (this.appKey) {
-        headers['x-application-key'] = this.appKey;
+        headers["x-application-key"] = this.appKey;
       }
 
       const options = {
         hostname: this.apiBase,
         path: `${this.apiPath}${endpoint}`,
         method: method,
-        headers: headers
+        headers: headers,
       };
 
-      if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
-        options.headers['Content-Type'] = 'application/json';
-        options.headers['Content-Length'] = Buffer.byteLength(postData);
+      if (method === "POST" || method === "PUT" || method === "PATCH") {
+        options.headers["Content-Type"] = "application/json";
+        options.headers["Content-Length"] = Buffer.byteLength(postData);
       }
 
       const req = https.request(options, (res) => {
-        let data = '';
+        let data = "";
 
-        res.on('data', (chunk) => {
+        res.on("data", (chunk) => {
           data += chunk;
         });
 
-        res.on('end', () => {
+        res.on("end", () => {
           try {
             const parsed = JSON.parse(data);
 
@@ -131,8 +131,12 @@ export class WorldAnvilClient {
             } else {
               // Properly serialize error objects for debugging
               const errorMsg = parsed.error
-                ? (typeof parsed.error === 'object' ? JSON.stringify(parsed.error) : parsed.error)
-                : (typeof parsed === 'object' ? JSON.stringify(parsed) : data);
+                ? typeof parsed.error === "object"
+                  ? JSON.stringify(parsed.error)
+                  : parsed.error
+                : typeof parsed === "object"
+                  ? JSON.stringify(parsed)
+                  : data;
               reject(new Error(`API Error (${res.statusCode}): ${errorMsg}`));
             }
           } catch (e) {
@@ -145,7 +149,7 @@ export class WorldAnvilClient {
         });
       });
 
-      req.on('error', (e) => {
+      req.on("error", (e) => {
         reject(new Error(`Network Error: ${e.message}`));
       });
 
@@ -162,7 +166,7 @@ export class WorldAnvilClient {
    * Get the current user's identity
    */
   async getIdentity() {
-    return this.request('/identity');
+    return this.request("/identity");
   }
 
   // ===== WORLDS =====
@@ -177,7 +181,7 @@ export class WorldAnvilClient {
     const userId = identity.id;
 
     // Then request worlds with user ID as query parameter
-    return this.request(`/user/worlds?id=${userId}`, 'POST', {});
+    return this.request(`/user/worlds?id=${userId}`, "POST", {});
   }
 
   /**
@@ -192,21 +196,21 @@ export class WorldAnvilClient {
    * Create a new world
    */
   async createWorld(data) {
-    return this.request('/world', 'PUT', data);
+    return this.request("/world", "PUT", data);
   }
 
   /**
    * Update an existing world
    */
   async updateWorld(worldId, data) {
-    return this.request(`/world?id=${worldId}`, 'PATCH', data);
+    return this.request(`/world?id=${worldId}`, "PATCH", data);
   }
 
   /**
    * Delete a world
    */
   async deleteWorld(worldId) {
-    return this.request(`/world?id=${worldId}`, 'DELETE');
+    return this.request(`/world?id=${worldId}`, "DELETE");
   }
 
   // ===== ARTICLES =====
@@ -217,7 +221,7 @@ export class WorldAnvilClient {
   async listArticles(worldId, options = {}) {
     const body = {
       limit: options.limit !== undefined ? String(options.limit) : "50",
-      offset: options.offset !== undefined ? String(options.offset) : "0"
+      offset: options.offset !== undefined ? String(options.offset) : "0",
     };
 
     if (options.category !== undefined) {
@@ -226,7 +230,7 @@ export class WorldAnvilClient {
       body.category = { id: "-1" };
     }
 
-    return this.request(`/world/articles?id=${worldId}`, 'POST', body);
+    return this.request(`/world/articles?id=${worldId}`, "POST", body);
   }
 
   /**
@@ -241,21 +245,21 @@ export class WorldAnvilClient {
    * Create a new article
    */
   async createArticle(data) {
-    return this.request('/article', 'PUT', data);
+    return this.request("/article", "PUT", data);
   }
 
   /**
    * Update an existing article
    */
   async updateArticle(articleId, data) {
-    return this.request(`/article?id=${articleId}`, 'PATCH', data);
+    return this.request(`/article?id=${articleId}`, "PATCH", data);
   }
 
   /**
    * Delete an article
    */
   async deleteArticle(articleId) {
-    return this.request(`/article?id=${articleId}`, 'DELETE');
+    return this.request(`/article?id=${articleId}`, "DELETE");
   }
 
   // ===== CATEGORIES =====
@@ -266,10 +270,10 @@ export class WorldAnvilClient {
   async listCategories(worldId, options = {}) {
     const body = {
       limit: options.limit !== undefined ? String(options.limit) : "50",
-      offset: options.offset !== undefined ? String(options.offset) : "0"
+      offset: options.offset !== undefined ? String(options.offset) : "0",
     };
 
-    return this.request(`/world/categories?id=${worldId}`, 'POST', body);
+    return this.request(`/world/categories?id=${worldId}`, "POST", body);
   }
 
   /**
@@ -284,21 +288,21 @@ export class WorldAnvilClient {
    * Create a new category
    */
   async createCategory(data) {
-    return this.request('/category', 'PUT', data);
+    return this.request("/category", "PUT", data);
   }
 
   /**
    * Update an existing category
    */
   async updateCategory(categoryId, data) {
-    return this.request(`/category?id=${categoryId}`, 'PATCH', data);
+    return this.request(`/category?id=${categoryId}`, "PATCH", data);
   }
 
   /**
    * Delete a category
    */
   async deleteCategory(categoryId) {
-    return this.request(`/category?id=${categoryId}`, 'DELETE');
+    return this.request(`/category?id=${categoryId}`, "DELETE");
   }
 
   // ===== IMAGES =====
@@ -309,10 +313,10 @@ export class WorldAnvilClient {
   async listImages(worldId, options = {}) {
     const body = {
       limit: options.limit !== undefined ? String(options.limit) : "50",
-      offset: options.offset !== undefined ? String(options.offset) : "0"
+      offset: options.offset !== undefined ? String(options.offset) : "0",
     };
 
-    return this.request(`/world/images?id=${worldId}`, 'POST', body);
+    return this.request(`/world/images?id=${worldId}`, "POST", body);
   }
 
   // ===== NOTEBOOKS =====
@@ -324,21 +328,21 @@ export class WorldAnvilClient {
   async listNotebooks(worldId, options = {}) {
     const body = {
       limit: options.limit !== undefined ? String(options.limit) : "50",
-      offset: options.offset !== undefined ? String(options.offset) : "0"
+      offset: options.offset !== undefined ? String(options.offset) : "0",
     };
-    return this.request(`/world/notebooks?id=${worldId}`, 'POST', body);
+    return this.request(`/world/notebooks?id=${worldId}`, "POST", body);
   }
 
   async createNotebook(data) {
-    return this.request('/notebook', 'PUT', data);
+    return this.request("/notebook", "PUT", data);
   }
 
   async updateNotebook(notebookId, data) {
-    return this.request(`/notebook?id=${notebookId}`, 'PATCH', data);
+    return this.request(`/notebook?id=${notebookId}`, "PATCH", data);
   }
 
   async deleteNotebook(notebookId) {
-    return this.request(`/notebook?id=${notebookId}`, 'DELETE');
+    return this.request(`/notebook?id=${notebookId}`, "DELETE");
   }
 
   // ===== NOTE SECTIONS =====
@@ -350,21 +354,25 @@ export class WorldAnvilClient {
   async listNotesections(notebookId, options = {}) {
     const body = {
       limit: options.limit !== undefined ? String(options.limit) : "50",
-      offset: options.offset !== undefined ? String(options.offset) : "0"
+      offset: options.offset !== undefined ? String(options.offset) : "0",
     };
-    return this.request(`/notebook/notesections?id=${notebookId}`, 'POST', body);
+    return this.request(
+      `/notebook/notesections?id=${notebookId}`,
+      "POST",
+      body,
+    );
   }
 
   async createNotesection(data) {
-    return this.request('/notesection', 'PUT', data);
+    return this.request("/notesection", "PUT", data);
   }
 
   async updateNotesection(notesectionId, data) {
-    return this.request(`/notesection?id=${notesectionId}`, 'PATCH', data);
+    return this.request(`/notesection?id=${notesectionId}`, "PATCH", data);
   }
 
   async deleteNotesection(notesectionId) {
-    return this.request(`/notesection?id=${notesectionId}`, 'DELETE');
+    return this.request(`/notesection?id=${notesectionId}`, "DELETE");
   }
 
   // ===== NOTES =====
@@ -376,21 +384,21 @@ export class WorldAnvilClient {
   async listNotes(notesectionId, options = {}) {
     const body = {
       limit: options.limit !== undefined ? String(options.limit) : "50",
-      offset: options.offset !== undefined ? String(options.offset) : "0"
+      offset: options.offset !== undefined ? String(options.offset) : "0",
     };
-    return this.request(`/notesection/notes?id=${notesectionId}`, 'POST', body);
+    return this.request(`/notesection/notes?id=${notesectionId}`, "POST", body);
   }
 
   async createNote(data) {
-    return this.request('/note', 'PUT', data);
+    return this.request("/note", "PUT", data);
   }
 
   async updateNote(noteId, data) {
-    return this.request(`/note?id=${noteId}`, 'PATCH', data);
+    return this.request(`/note?id=${noteId}`, "PATCH", data);
   }
 
   async deleteNote(noteId) {
-    return this.request(`/note?id=${noteId}`, 'DELETE');
+    return this.request(`/note?id=${noteId}`, "DELETE");
   }
 
   // ===== SECRETS =====
@@ -402,21 +410,21 @@ export class WorldAnvilClient {
   async listSecrets(worldId, options = {}) {
     const body = {
       limit: options.limit !== undefined ? String(options.limit) : "50",
-      offset: options.offset !== undefined ? String(options.offset) : "0"
+      offset: options.offset !== undefined ? String(options.offset) : "0",
     };
-    return this.request(`/world/secrets?id=${worldId}`, 'POST', body);
+    return this.request(`/world/secrets?id=${worldId}`, "POST", body);
   }
 
   async createSecret(data) {
-    return this.request('/secret', 'PUT', data);
+    return this.request("/secret", "PUT", data);
   }
 
   async updateSecret(secretId, data) {
-    return this.request(`/secret?id=${secretId}`, 'PATCH', data);
+    return this.request(`/secret?id=${secretId}`, "PATCH", data);
   }
 
   async deleteSecret(secretId) {
-    return this.request(`/secret?id=${secretId}`, 'DELETE');
+    return this.request(`/secret?id=${secretId}`, "DELETE");
   }
 
   // ===== MAPS =====
@@ -428,21 +436,21 @@ export class WorldAnvilClient {
   async listMaps(worldId, options = {}) {
     const body = {
       limit: options.limit !== undefined ? String(options.limit) : "50",
-      offset: options.offset !== undefined ? String(options.offset) : "0"
+      offset: options.offset !== undefined ? String(options.offset) : "0",
     };
-    return this.request(`/world/maps?id=${worldId}`, 'POST', body);
+    return this.request(`/world/maps?id=${worldId}`, "POST", body);
   }
 
   async createMap(data) {
-    return this.request('/map', 'PUT', data);
+    return this.request("/map", "PUT", data);
   }
 
   async updateMap(mapId, data) {
-    return this.request(`/map?id=${mapId}`, 'PATCH', data);
+    return this.request(`/map?id=${mapId}`, "PATCH", data);
   }
 
   async deleteMap(mapId) {
-    return this.request(`/map?id=${mapId}`, 'DELETE');
+    return this.request(`/map?id=${mapId}`, "DELETE");
   }
 
   // ===== MAP MARKERS =====
@@ -454,21 +462,21 @@ export class WorldAnvilClient {
   async listMarkers(mapId, options = {}) {
     const body = {
       limit: options.limit !== undefined ? String(options.limit) : "50",
-      offset: options.offset !== undefined ? String(options.offset) : "0"
+      offset: options.offset !== undefined ? String(options.offset) : "0",
     };
-    return this.request(`/map/markers?id=${mapId}`, 'POST', body);
+    return this.request(`/map/markers?id=${mapId}`, "POST", body);
   }
 
   async createMarker(data) {
-    return this.request('/marker', 'PUT', data);
+    return this.request("/marker", "PUT", data);
   }
 
   async updateMarker(markerId, data) {
-    return this.request(`/marker?id=${markerId}`, 'PATCH', data);
+    return this.request(`/marker?id=${markerId}`, "PATCH", data);
   }
 
   async deleteMarker(markerId) {
-    return this.request(`/marker?id=${markerId}`, 'DELETE');
+    return this.request(`/marker?id=${markerId}`, "DELETE");
   }
 
   // ===== TIMELINES =====
@@ -480,21 +488,21 @@ export class WorldAnvilClient {
   async listTimelines(worldId, options = {}) {
     const body = {
       limit: options.limit !== undefined ? String(options.limit) : "50",
-      offset: options.offset !== undefined ? String(options.offset) : "0"
+      offset: options.offset !== undefined ? String(options.offset) : "0",
     };
-    return this.request(`/world/timelines?id=${worldId}`, 'POST', body);
+    return this.request(`/world/timelines?id=${worldId}`, "POST", body);
   }
 
   async createTimeline(data) {
-    return this.request('/timeline', 'PUT', data);
+    return this.request("/timeline", "PUT", data);
   }
 
   async updateTimeline(timelineId, data) {
-    return this.request(`/timeline?id=${timelineId}`, 'PATCH', data);
+    return this.request(`/timeline?id=${timelineId}`, "PATCH", data);
   }
 
   async deleteTimeline(timelineId) {
-    return this.request(`/timeline?id=${timelineId}`, 'DELETE');
+    return this.request(`/timeline?id=${timelineId}`, "DELETE");
   }
 
   // ===== HISTORY EVENTS =====
@@ -506,21 +514,21 @@ export class WorldAnvilClient {
   async listHistories(worldId, options = {}) {
     const body = {
       limit: options.limit !== undefined ? String(options.limit) : "50",
-      offset: options.offset !== undefined ? String(options.offset) : "0"
+      offset: options.offset !== undefined ? String(options.offset) : "0",
     };
-    return this.request(`/world/histories?id=${worldId}`, 'POST', body);
+    return this.request(`/world/histories?id=${worldId}`, "POST", body);
   }
 
   async createHistory(data) {
-    return this.request('/history', 'PUT', data);
+    return this.request("/history", "PUT", data);
   }
 
   async updateHistory(historyId, data) {
-    return this.request(`/history?id=${historyId}`, 'PATCH', data);
+    return this.request(`/history?id=${historyId}`, "PATCH", data);
   }
 
   async deleteHistory(historyId) {
-    return this.request(`/history?id=${historyId}`, 'DELETE');
+    return this.request(`/history?id=${historyId}`, "DELETE");
   }
 
   // ===== RPG SYSTEMS =====
@@ -532,9 +540,9 @@ export class WorldAnvilClient {
   async listRpgSystems(options = {}) {
     const body = {
       limit: options.limit !== undefined ? String(options.limit) : "50",
-      offset: options.offset !== undefined ? String(options.offset) : "0"
+      offset: options.offset !== undefined ? String(options.offset) : "0",
     };
-    return this.request('/rpgsystems', 'POST', body);
+    return this.request("/rpgsystems", "POST", body);
   }
 
   // ===== BLOCKS & BLOCK FOLDERS =====
@@ -546,29 +554,33 @@ export class WorldAnvilClient {
   async listBlocks(worldId, options = {}) {
     const body = {
       limit: options.limit !== undefined ? String(options.limit) : "50",
-      offset: options.offset !== undefined ? String(options.offset) : "0"
+      offset: options.offset !== undefined ? String(options.offset) : "0",
     };
-    return this.request(`/world/blocks?id=${worldId}`, 'POST', body);
+    return this.request(`/world/blocks?id=${worldId}`, "POST", body);
   }
 
   async listBlocksInFolder(blockFolderId, options = {}) {
     const body = {
       limit: options.limit !== undefined ? String(options.limit) : "50",
-      offset: options.offset !== undefined ? String(options.offset) : "0"
+      offset: options.offset !== undefined ? String(options.offset) : "0",
     };
-    return this.request(`/blockfolder/blocks?id=${blockFolderId}`, 'POST', body);
+    return this.request(
+      `/blockfolder/blocks?id=${blockFolderId}`,
+      "POST",
+      body,
+    );
   }
 
   async createBlock(data) {
-    return this.request('/block', 'PUT', data);
+    return this.request("/block", "PUT", data);
   }
 
   async updateBlock(blockId, data) {
-    return this.request(`/block?id=${blockId}`, 'PATCH', data);
+    return this.request(`/block?id=${blockId}`, "PATCH", data);
   }
 
   async deleteBlock(blockId) {
-    return this.request(`/block?id=${blockId}`, 'DELETE');
+    return this.request(`/block?id=${blockId}`, "DELETE");
   }
 
   async getBlockFolder(blockFolderId) {
@@ -578,21 +590,21 @@ export class WorldAnvilClient {
   async listBlockFolders(worldId, options = {}) {
     const body = {
       limit: options.limit !== undefined ? String(options.limit) : "50",
-      offset: options.offset !== undefined ? String(options.offset) : "0"
+      offset: options.offset !== undefined ? String(options.offset) : "0",
     };
-    return this.request(`/world/blockfolders?id=${worldId}`, 'POST', body);
+    return this.request(`/world/blockfolders?id=${worldId}`, "POST", body);
   }
 
   async createBlockFolder(data) {
-    return this.request('/blockfolder', 'PUT', data);
+    return this.request("/blockfolder", "PUT", data);
   }
 
   async updateBlockFolder(blockFolderId, data) {
-    return this.request(`/blockfolder?id=${blockFolderId}`, 'PATCH', data);
+    return this.request(`/blockfolder?id=${blockFolderId}`, "PATCH", data);
   }
 
   async deleteBlockFolder(blockFolderId) {
-    return this.request(`/blockfolder?id=${blockFolderId}`, 'DELETE');
+    return this.request(`/blockfolder?id=${blockFolderId}`, "DELETE");
   }
 
   // ===== BLOCK TEMPLATES =====
@@ -604,21 +616,21 @@ export class WorldAnvilClient {
   async listBlockTemplates(userId, options = {}) {
     const body = {
       limit: options.limit !== undefined ? String(options.limit) : "50",
-      offset: options.offset !== undefined ? String(options.offset) : "0"
+      offset: options.offset !== undefined ? String(options.offset) : "0",
     };
-    return this.request(`/user/blocktemplates?id=${userId}`, 'POST', body);
+    return this.request(`/user/blocktemplates?id=${userId}`, "POST", body);
   }
 
   async createBlockTemplate(data) {
-    return this.request('/blocktemplate', 'PUT', data);
+    return this.request("/blocktemplate", "PUT", data);
   }
 
   async updateBlockTemplate(templateId, data) {
-    return this.request(`/blocktemplate?id=${templateId}`, 'PATCH', data);
+    return this.request(`/blocktemplate?id=${templateId}`, "PATCH", data);
   }
 
   async deleteBlockTemplate(templateId) {
-    return this.request(`/blocktemplate?id=${templateId}`, 'DELETE');
+    return this.request(`/blocktemplate?id=${templateId}`, "DELETE");
   }
 
   // ===== BLOCK TEMPLATE PARTS =====
@@ -630,21 +642,25 @@ export class WorldAnvilClient {
   async listBlockTemplateParts(templateId, options = {}) {
     const body = {
       limit: options.limit !== undefined ? String(options.limit) : "50",
-      offset: options.offset !== undefined ? String(options.offset) : "0"
+      offset: options.offset !== undefined ? String(options.offset) : "0",
     };
-    return this.request(`/blocktemplate/blocktemplateparts?id=${templateId}`, 'POST', body);
+    return this.request(
+      `/blocktemplate/blocktemplateparts?id=${templateId}`,
+      "POST",
+      body,
+    );
   }
 
   async createBlockTemplatePart(data) {
-    return this.request('/blocktemplatepart', 'PUT', data);
+    return this.request("/blocktemplatepart", "PUT", data);
   }
 
   async updateBlockTemplatePart(partId, data) {
-    return this.request(`/blocktemplatepart?id=${partId}`, 'PATCH', data);
+    return this.request(`/blocktemplatepart?id=${partId}`, "PATCH", data);
   }
 
   async deleteBlockTemplatePart(partId) {
-    return this.request(`/blocktemplatepart?id=${partId}`, 'DELETE');
+    return this.request(`/blocktemplatepart?id=${partId}`, "DELETE");
   }
 
   // ===== MANUSCRIPTS =====
@@ -656,21 +672,21 @@ export class WorldAnvilClient {
   async listManuscripts(worldId, options = {}) {
     const body = {
       limit: options.limit !== undefined ? String(options.limit) : "50",
-      offset: options.offset !== undefined ? String(options.offset) : "0"
+      offset: options.offset !== undefined ? String(options.offset) : "0",
     };
-    return this.request(`/world/manuscripts?id=${worldId}`, 'POST', body);
+    return this.request(`/world/manuscripts?id=${worldId}`, "POST", body);
   }
 
   async createManuscript(data) {
-    return this.request('/manuscript', 'PUT', data);
+    return this.request("/manuscript", "PUT", data);
   }
 
   async updateManuscript(manuscriptId, data) {
-    return this.request(`/manuscript?id=${manuscriptId}`, 'PATCH', data);
+    return this.request(`/manuscript?id=${manuscriptId}`, "PATCH", data);
   }
 
   async deleteManuscript(manuscriptId) {
-    return this.request(`/manuscript?id=${manuscriptId}`, 'DELETE');
+    return this.request(`/manuscript?id=${manuscriptId}`, "DELETE");
   }
 
   // ===== CANVAS (Visual Boards) =====
@@ -682,100 +698,122 @@ export class WorldAnvilClient {
   async listCanvases(worldId, options = {}) {
     const body = {
       limit: options.limit !== undefined ? String(options.limit) : "50",
-      offset: options.offset !== undefined ? String(options.offset) : "0"
+      offset: options.offset !== undefined ? String(options.offset) : "0",
     };
-    return this.request(`/world/canvases?id=${worldId}`, 'POST', body);
+    return this.request(`/world/canvases?id=${worldId}`, "POST", body);
   }
 
   async createCanvas(data) {
-    return this.request('/canvas', 'PUT', data);
+    return this.request("/canvas", "PUT", data);
   }
 
   async updateCanvas(canvasId, data) {
-    return this.request(`/canvas?id=${canvasId}`, 'PATCH', data);
+    return this.request(`/canvas?id=${canvasId}`, "PATCH", data);
   }
 
   async deleteCanvas(canvasId) {
-    return this.request(`/canvas?id=${canvasId}`, 'DELETE');
+    return this.request(`/canvas?id=${canvasId}`, "DELETE");
   }
 
   // ===== SUBSCRIBER GROUPS =====
 
   async getSubscriberGroup(subscriberGroupId) {
-    return this.request(`/subscribergroup?id=${subscriberGroupId}&granularity=2`);
+    return this.request(
+      `/subscribergroup?id=${subscriberGroupId}&granularity=2`,
+    );
   }
 
   async listSubscriberGroups(worldId, options = {}) {
     const body = {
       limit: options.limit !== undefined ? String(options.limit) : "50",
-      offset: options.offset !== undefined ? String(options.offset) : "0"
+      offset: options.offset !== undefined ? String(options.offset) : "0",
     };
-    return this.request(`/world/subscribergroups?id=${worldId}`, 'POST', body);
+    return this.request(`/world/subscribergroups?id=${worldId}`, "POST", body);
   }
 
   async createSubscriberGroup(data) {
-    return this.request('/subscribergroup', 'PUT', data);
+    return this.request("/subscribergroup", "PUT", data);
   }
 
   async updateSubscriberGroup(subscriberGroupId, data) {
-    return this.request(`/subscribergroup?id=${subscriberGroupId}`, 'PATCH', data);
+    return this.request(
+      `/subscribergroup?id=${subscriberGroupId}`,
+      "PATCH",
+      data,
+    );
   }
 
   async deleteSubscriberGroup(subscriberGroupId) {
-    return this.request(`/subscribergroup?id=${subscriberGroupId}`, 'DELETE');
+    return this.request(`/subscribergroup?id=${subscriberGroupId}`, "DELETE");
   }
 
   // ===== VARIABLE COLLECTIONS =====
   // Note: Swagger shows /variable_collection but API uses /variablecollection
 
   async getVariableCollection(collectionId, granularity = 2) {
-    return this.request(`/variablecollection?id=${collectionId}&granularity=${granularity}`);
+    return this.request(
+      `/variablecollection?id=${collectionId}&granularity=${granularity}`,
+    );
   }
 
   async listVariableCollections(worldId, options = {}) {
     const body = {
       limit: options.limit !== undefined ? String(options.limit) : "50",
-      offset: options.offset !== undefined ? String(options.offset) : "0"
+      offset: options.offset !== undefined ? String(options.offset) : "0",
     };
-    return this.request(`/world/variablecollections?id=${worldId}`, 'POST', body);
+    return this.request(
+      `/world/variablecollections?id=${worldId}`,
+      "POST",
+      body,
+    );
   }
 
   async createVariableCollection(data) {
-    return this.request('/variablecollection', 'PUT', data);
+    return this.request("/variablecollection", "PUT", data);
   }
 
   async updateVariableCollection(collectionId, data) {
-    return this.request(`/variablecollection?id=${collectionId}`, 'PATCH', data);
+    return this.request(
+      `/variablecollection?id=${collectionId}`,
+      "PATCH",
+      data,
+    );
   }
 
   async deleteVariableCollection(collectionId) {
-    return this.request(`/variablecollection?id=${collectionId}`, 'DELETE');
+    return this.request(`/variablecollection?id=${collectionId}`, "DELETE");
   }
 
   // ===== VARIABLES =====
 
   async getVariable(variableId, granularity = 2) {
-    return this.request(`/variable?id=${variableId}&granularity=${granularity}`);
+    return this.request(
+      `/variable?id=${variableId}&granularity=${granularity}`,
+    );
   }
 
   async listVariables(collectionId, options = {}) {
     const body = {
       limit: options.limit !== undefined ? String(options.limit) : "50",
-      offset: options.offset !== undefined ? String(options.offset) : "0"
+      offset: options.offset !== undefined ? String(options.offset) : "0",
     };
     // Swagger shows /variable_collection/variables but API may use /variablecollection/variables
-    return this.request(`/variablecollection/variables?id=${collectionId}`, 'POST', body);
+    return this.request(
+      `/variablecollection/variables?id=${collectionId}`,
+      "POST",
+      body,
+    );
   }
 
   async createVariable(data) {
-    return this.request('/variable', 'PUT', data);
+    return this.request("/variable", "PUT", data);
   }
 
   async updateVariable(variableId, data) {
-    return this.request(`/variable?id=${variableId}`, 'PATCH', data);
+    return this.request(`/variable?id=${variableId}`, "PATCH", data);
   }
 
   async deleteVariable(variableId) {
-    return this.request(`/variable?id=${variableId}`, 'DELETE');
+    return this.request(`/variable?id=${variableId}`, "DELETE");
   }
 }
