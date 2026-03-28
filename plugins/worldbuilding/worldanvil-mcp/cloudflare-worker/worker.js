@@ -38,9 +38,6 @@ export default {
     // Build the WorldAnvil API URL
     const waUrl = `${WORLDANVIL_API}${path}`;
 
-    // Clone headers and inject the App Key
-    const headers = new Headers(request.headers);
-
     // Validate that we have the App Key configured
     if (!env.WA_APP_KEY) {
       return new Response(JSON.stringify({
@@ -51,11 +48,9 @@ export default {
       });
     }
 
-    // Inject the App Key (this is the whole point of the proxy)
-    headers.set('x-application-key', env.WA_APP_KEY);
-
     // Ensure Auth Token is present (user must provide this)
-    if (!headers.get('x-auth-token')) {
+    const authToken = request.headers.get('x-auth-token');
+    if (!authToken) {
       return new Response(JSON.stringify({
         error: 'Missing x-auth-token header. You must provide your WorldAnvil Auth Token.'
       }), {
@@ -64,8 +59,22 @@ export default {
       });
     }
 
-    // Set a custom User-Agent to identify proxy requests
-    headers.set('User-Agent', 'WorldAnvil-MCP-Proxy/1.0');
+    // Build a clean set of headers instead of forwarding all inbound headers.
+    // Cloning all headers forwards Cloudflare-internal headers (CF-Connecting-IP,
+    // CF-Ray, CF-Worker, etc.) to WorldAnvil's Cloudflare zone, which sees
+    // mismatched CF headers and triggers bot protection (403 JS challenge).
+    const headers = new Headers({
+      'x-auth-token': authToken,
+      'x-application-key': env.WA_APP_KEY,
+      'Accept': 'application/json',
+      'User-Agent': 'WorldAnvil-MCP/1.0',
+    });
+
+    // Forward Content-Type for requests with a body
+    const contentType = request.headers.get('Content-Type');
+    if (contentType) {
+      headers.set('Content-Type', contentType);
+    }
 
     // Forward the request to WorldAnvil
     try {
