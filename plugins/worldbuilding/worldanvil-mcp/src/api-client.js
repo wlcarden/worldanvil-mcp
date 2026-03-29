@@ -108,6 +108,7 @@ export class WorldAnvilClient {
         path: `${this.apiPath}${endpoint}`,
         method: method,
         headers: headers,
+        timeout: 30000,
       };
 
       if (method === "POST" || method === "PUT" || method === "PATCH") {
@@ -151,6 +152,11 @@ export class WorldAnvilClient {
 
       req.on("error", (e) => {
         reject(new Error(`Network Error: ${e.message}`));
+      });
+
+      req.on("timeout", () => {
+        req.destroy();
+        reject(new Error("Request timeout: no response within 30000ms"));
       });
 
       if (postData) {

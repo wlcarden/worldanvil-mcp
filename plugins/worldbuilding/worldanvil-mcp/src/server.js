@@ -4,15 +4,19 @@
  * Creates and configures the MCP server instance.
  */
 
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { createRequire } from "module";
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js';
+} from "@modelcontextprotocol/sdk/types.js";
 
-import { WorldAnvilClient } from './api-client.js';
-import { getToolDefinitions } from './tools.js';
-import { handleToolCall } from './handlers.js';
+const require = createRequire(import.meta.url);
+const { version: PKG_VERSION } = require("../package.json");
+
+import { WorldAnvilClient } from "./api-client.js";
+import { getToolDefinitions } from "./tools.js";
+import { handleToolCall } from "./handlers.js";
 
 /**
  * Server configuration options
@@ -20,7 +24,7 @@ import { handleToolCall } from './handlers.js';
  * @property {string} [appKey] - World Anvil Application Key (defaults to WA_APP_KEY env var)
  * @property {string} [authToken] - World Anvil Auth Token (defaults to WA_AUTH_TOKEN env var)
  * @property {string} [name='worldanvil-mcp'] - Server name
- * @property {string} [version='1.3.0'] - Server version
+ * @property {string} [version] - Server version (defaults to package.json version)
  */
 
 /**
@@ -39,14 +43,14 @@ export function createServer(config = {}) {
   // Create the MCP server
   const server = new Server(
     {
-      name: config.name || 'worldanvil-mcp',
-      version: config.version || '1.3.0',
+      name: config.name || "worldanvil-mcp",
+      version: config.version || PKG_VERSION,
     },
     {
       capabilities: {
         tools: {},
       },
-    }
+    },
   );
 
   // Register tool list handler
@@ -66,7 +70,7 @@ export function createServer(config = {}) {
 /**
  * Re-export modules for testing and direct use
  */
-export { WorldAnvilClient } from './api-client.js';
-export { getToolDefinitions } from './tools.js';
-export { handleToolCall } from './handlers.js';
-export { markdownToBBCode, convertFieldsToBBCode } from './utils.js';
+export { WorldAnvilClient } from "./api-client.js";
+export { getToolDefinitions } from "./tools.js";
+export { handleToolCall } from "./handlers.js";
+export { markdownToBBCode, convertFieldsToBBCode } from "./utils.js";
