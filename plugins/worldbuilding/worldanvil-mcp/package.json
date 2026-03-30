@@ -1,6 +1,6 @@
 {
   "name": "worldanvil-mcp",
-  "version": "1.10.0",
+  "version": "1.11.0",
   "description": "MCP server for WorldAnvil API - works with Claude Code, Cursor, Windsurf, and any MCP-compatible AI tool",
   "main": "index.js",
   "bin": {

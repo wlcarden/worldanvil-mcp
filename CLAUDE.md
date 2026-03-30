@@ -46,6 +46,7 @@ Tests load credentials from `.env` in the package directory (use `dotenv`). Inte
 | `WA_AUTH_TOKEN` | Always | User's WorldAnvil auth token |
 | `WA_APP_KEY` | Optional | Direct API mode; if omitted, uses default public proxy |
 | `WA_PROXY_URL` | Optional | Custom Cloudflare Worker proxy URL |
+| `WA_TOOL_GROUPS` | Optional | Comma-separated tool groups or preset to load (default: all). Groups: core, content, images, campaign, maps, timeline, blocks, manuscripts, canvas, variables, social, rpg. Presets: all, standard, worldbuilding, writing, gamemaster |
 
 ## Architecture
 

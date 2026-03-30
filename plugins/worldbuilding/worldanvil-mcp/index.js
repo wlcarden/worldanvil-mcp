@@ -6,12 +6,19 @@
  * Provides MCP tools for interacting with the World Anvil API from Claude Code.
  *
  * Environment variables:
- *   WA_AUTH_TOKEN - World Anvil User Authentication Token (required)
- *   WA_APP_KEY    - World Anvil Application Key (optional; required only for
- *                   direct API mode. If omitted, the server uses proxy mode
- *                   and the proxy injects the application key.)
+ *   WA_AUTH_TOKEN   - World Anvil User Authentication Token (required)
+ *   WA_APP_KEY      - World Anvil Application Key (optional; required only for
+ *                     direct API mode. If omitted, the server uses proxy mode
+ *                     and the proxy injects the application key.)
+ *   WA_TOOL_GROUPS  - Comma-separated tool groups or preset to load (optional;
+ *                     defaults to 'all'). Reduces context overhead for LLMs.
+ *                     Groups: core, content, images, campaign, maps, timeline,
+ *                             blocks, manuscripts, canvas, variables, social, rpg
+ *                     Presets: all, standard, worldbuilding, writing, gamemaster
  *
  * Changelog:
+ *   v1.11.0 - Add 73 new tools (map layers/groups/types, manuscript sub-resources,
+ *             user/image CRUD), tool group filtering via WA_TOOL_GROUPS env var
  *   v1.3.0 - Modular refactor, added Blocks/BlockFolders/Manuscripts, test infrastructure
  *   v1.2.0 - Improved template docs, better error messages, ordered list support
  *   v1.1.1 - Fixed PATCH endpoints to use query params
@@ -20,8 +27,8 @@
  *   v1.0.0 - Initial release with basic CRUD operations
  */
 
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { createServer } from './src/server.js';
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { createServer } from "./src/server.js";
 
 // Validate environment variables
 // WA_APP_KEY is optional: omitting it enables proxy mode, where the proxy
@@ -30,12 +37,19 @@ const APP_KEY = process.env.WA_APP_KEY;
 const AUTH_TOKEN = process.env.WA_AUTH_TOKEN;
 
 if (!AUTH_TOKEN) {
-  console.error('Error: WA_AUTH_TOKEN environment variable must be set');
+  console.error("Error: WA_AUTH_TOKEN environment variable must be set");
   process.exit(1);
 }
 
 if (!APP_KEY) {
-  console.error('Info: WA_APP_KEY not set — running in proxy mode');
+  console.error("Info: WA_APP_KEY not set — running in proxy mode");
+}
+
+const TOOL_GROUPS = process.env.WA_TOOL_GROUPS;
+if (TOOL_GROUPS && TOOL_GROUPS.toLowerCase() !== "all") {
+  console.error(
+    `Info: WA_TOOL_GROUPS=${TOOL_GROUPS} — loading subset of tools`,
+  );
 }
 
 /**
@@ -49,10 +63,10 @@ async function main() {
 
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error('World Anvil MCP server running on stdio');
+  console.error("World Anvil MCP server running on stdio");
 }
 
 main().catch((error) => {
-  console.error('Fatal error:', error);
+  console.error("Fatal error:", error);
   process.exit(1);
 });

@@ -17,12 +17,14 @@ const { version: PKG_VERSION } = require("../package.json");
 import { WorldAnvilClient } from "./api-client.js";
 import { getToolDefinitions } from "./tools.js";
 import { handleToolCall } from "./handlers.js";
+import { parseToolGroups, filterTools } from "./tool-groups.js";
 
 /**
  * Server configuration options
  * @typedef {Object} ServerConfig
  * @property {string} [appKey] - World Anvil Application Key (defaults to WA_APP_KEY env var)
  * @property {string} [authToken] - World Anvil Auth Token (defaults to WA_AUTH_TOKEN env var)
+ * @property {string} [toolGroups] - Comma-separated tool groups or preset (defaults to WA_TOOL_GROUPS env var)
  * @property {string} [name='worldanvil-mcp'] - Server name
  * @property {string} [version] - Server version (defaults to package.json version)
  */
@@ -40,6 +42,11 @@ export function createServer(config = {}) {
     authToken: config.authToken,
   });
 
+  // Parse tool group filter (env var or config)
+  const enabledGroups = parseToolGroups(
+    config.toolGroups || process.env.WA_TOOL_GROUPS,
+  );
+
   // Create the MCP server
   const server = new Server(
     {
@@ -53,9 +60,9 @@ export function createServer(config = {}) {
     },
   );
 
-  // Register tool list handler
+  // Register tool list handler (filtered by enabled groups)
   server.setRequestHandler(ListToolsRequestSchema, async () => {
-    return { tools: getToolDefinitions() };
+    return { tools: filterTools(getToolDefinitions(), enabledGroups) };
   });
 
   // Register tool call handler
@@ -74,3 +81,4 @@ export { WorldAnvilClient } from "./api-client.js";
 export { getToolDefinitions } from "./tools.js";
 export { handleToolCall } from "./handlers.js";
 export { markdownToBBCode, convertFieldsToBBCode } from "./utils.js";
+export { parseToolGroups, filterTools } from "./tool-groups.js";

@@ -822,4 +822,359 @@ export class WorldAnvilClient {
   async deleteVariable(variableId) {
     return this.request(`/variable?id=${variableId}`, "DELETE");
   }
+
+  // ===== MAP LAYERS =====
+
+  async getLayer(layerId) {
+    return this.request(`/layer?id=${layerId}&granularity=2`);
+  }
+
+  async listLayers(mapId, options = {}) {
+    const body = {
+      limit: options.limit !== undefined ? String(options.limit) : "50",
+      offset: options.offset !== undefined ? String(options.offset) : "0",
+    };
+    return this.request(`/map/layers?id=${mapId}`, "POST", body);
+  }
+
+  async createLayer(data) {
+    return this.request("/layer", "PUT", data);
+  }
+
+  async updateLayer(layerId, data) {
+    return this.request(`/layer?id=${layerId}`, "PATCH", data);
+  }
+
+  async deleteLayer(layerId) {
+    return this.request(`/layer?id=${layerId}`, "DELETE");
+  }
+
+  // ===== MARKER GROUPS =====
+
+  async getMarkerGroup(markerGroupId) {
+    return this.request(`/markergroup?id=${markerGroupId}&granularity=2`);
+  }
+
+  async listMarkerGroups(mapId, options = {}) {
+    const body = {
+      limit: options.limit !== undefined ? String(options.limit) : "50",
+      offset: options.offset !== undefined ? String(options.offset) : "0",
+    };
+    return this.request(`/map/markergroups?id=${mapId}`, "POST", body);
+  }
+
+  async listMarkersInGroup(markerGroupId, options = {}) {
+    const body = {
+      limit: options.limit !== undefined ? String(options.limit) : "50",
+      offset: options.offset !== undefined ? String(options.offset) : "0",
+    };
+    return this.request(
+      `/markergroup/markers?id=${markerGroupId}`,
+      "POST",
+      body,
+    );
+  }
+
+  async createMarkerGroup(data) {
+    return this.request("/markergroup", "PUT", data);
+  }
+
+  async updateMarkerGroup(markerGroupId, data) {
+    return this.request(`/markergroup?id=${markerGroupId}`, "PATCH", data);
+  }
+
+  async deleteMarkerGroup(markerGroupId) {
+    return this.request(`/markergroup?id=${markerGroupId}`, "DELETE");
+  }
+
+  // ===== MARKER TYPES =====
+
+  async getMarkerType(markerTypeId) {
+    return this.request(`/markertype?id=${markerTypeId}&granularity=2`);
+  }
+
+  async listMarkerTypes(options = {}) {
+    const body = {
+      limit: options.limit !== undefined ? String(options.limit) : "50",
+      offset: options.offset !== undefined ? String(options.offset) : "0",
+    };
+    return this.request("/markertypes", "POST", body);
+  }
+
+  async createMarkerType(data) {
+    return this.request("/markertype", "PUT", data);
+  }
+
+  async updateMarkerType(markerTypeId, data) {
+    return this.request(`/markertype?id=${markerTypeId}`, "PATCH", data);
+  }
+
+  async deleteMarkerType(markerTypeId) {
+    return this.request(`/markertype?id=${markerTypeId}`, "DELETE");
+  }
+
+  // ===== USERS =====
+
+  async getUser(userId) {
+    return this.request(`/user?id=${userId}&granularity=2`);
+  }
+
+  async updateUser(userId, data) {
+    return this.request(`/user?id=${userId}`, "PATCH", data);
+  }
+
+  // ===== IMAGES (single resource) =====
+
+  async getImage(imageId) {
+    return this.request(`/image?id=${imageId}&granularity=2`);
+  }
+
+  async updateImage(imageId, data) {
+    return this.request(`/image?id=${imageId}`, "PATCH", data);
+  }
+
+  async deleteImage(imageId) {
+    return this.request(`/image?id=${imageId}`, "DELETE");
+  }
+
+  // ===== MANUSCRIPT VERSIONS =====
+  // Note: Swagger shows /manuscript_version with underscore
+
+  async getManuscriptVersion(versionId) {
+    return this.request(`/manuscript_version?id=${versionId}&granularity=2`);
+  }
+
+  async listManuscriptVersions(manuscriptId, options = {}) {
+    const body = {
+      limit: options.limit !== undefined ? String(options.limit) : "50",
+      offset: options.offset !== undefined ? String(options.offset) : "0",
+    };
+    return this.request(
+      `/manuscript/manuscript_versions?id=${manuscriptId}`,
+      "POST",
+      body,
+    );
+  }
+
+  async createManuscriptVersion(data) {
+    return this.request("/manuscript_version", "PUT", data);
+  }
+
+  async updateManuscriptVersion(versionId, data) {
+    return this.request(`/manuscript_version?id=${versionId}`, "PATCH", data);
+  }
+
+  async deleteManuscriptVersion(versionId) {
+    return this.request(`/manuscript_version?id=${versionId}`, "DELETE");
+  }
+
+  // ===== MANUSCRIPT PARTS =====
+
+  async getManuscriptPart(partId) {
+    return this.request(`/manuscript_part?id=${partId}&granularity=2`);
+  }
+
+  async listManuscriptParts(versionId, options = {}) {
+    const body = {
+      limit: options.limit !== undefined ? String(options.limit) : "50",
+      offset: options.offset !== undefined ? String(options.offset) : "0",
+    };
+    return this.request(
+      `/manuscript_version/manuscript_parts?id=${versionId}`,
+      "POST",
+      body,
+    );
+  }
+
+  async createManuscriptPart(data) {
+    return this.request("/manuscript_part", "PUT", data);
+  }
+
+  async updateManuscriptPart(partId, data) {
+    return this.request(`/manuscript_part?id=${partId}`, "PATCH", data);
+  }
+
+  async deleteManuscriptPart(partId) {
+    return this.request(`/manuscript_part?id=${partId}`, "DELETE");
+  }
+
+  // ===== MANUSCRIPT BEATS =====
+
+  async getManuscriptBeat(beatId) {
+    return this.request(`/manuscript_beat?id=${beatId}&granularity=2`);
+  }
+
+  async listManuscriptBeats(partId, options = {}) {
+    const body = {
+      limit: options.limit !== undefined ? String(options.limit) : "50",
+      offset: options.offset !== undefined ? String(options.offset) : "0",
+    };
+    return this.request(
+      `/manuscript_part/manuscript_beats?id=${partId}`,
+      "POST",
+      body,
+    );
+  }
+
+  async createManuscriptBeat(data) {
+    return this.request("/manuscript_beat", "PUT", data);
+  }
+
+  async updateManuscriptBeat(beatId, data) {
+    return this.request(`/manuscript_beat?id=${beatId}`, "PATCH", data);
+  }
+
+  async deleteManuscriptBeat(beatId) {
+    return this.request(`/manuscript_beat?id=${beatId}`, "DELETE");
+  }
+
+  // ===== MANUSCRIPT BOOKMARKS =====
+
+  async getManuscriptBookmark(bookmarkId) {
+    return this.request(`/manuscript_bookmark?id=${bookmarkId}&granularity=2`);
+  }
+
+  async listManuscriptBookmarks(manuscriptId, options = {}) {
+    const body = {
+      limit: options.limit !== undefined ? String(options.limit) : "50",
+      offset: options.offset !== undefined ? String(options.offset) : "0",
+    };
+    return this.request(
+      `/manuscript/manuscript_bookmarks?id=${manuscriptId}`,
+      "POST",
+      body,
+    );
+  }
+
+  async createManuscriptBookmark(data) {
+    return this.request("/manuscript_bookmark", "PUT", data);
+  }
+
+  async updateManuscriptBookmark(bookmarkId, data) {
+    return this.request(`/manuscript_bookmark?id=${bookmarkId}`, "PATCH", data);
+  }
+
+  async deleteManuscriptBookmark(bookmarkId) {
+    return this.request(`/manuscript_bookmark?id=${bookmarkId}`, "DELETE");
+  }
+
+  // ===== MANUSCRIPT TAGS =====
+
+  async getManuscriptTag(tagId) {
+    return this.request(`/manuscript_tag?id=${tagId}&granularity=2`);
+  }
+
+  async listManuscriptTags(manuscriptId, options = {}) {
+    const body = {
+      limit: options.limit !== undefined ? String(options.limit) : "50",
+      offset: options.offset !== undefined ? String(options.offset) : "0",
+    };
+    return this.request(
+      `/manuscript/manuscript_tags?id=${manuscriptId}`,
+      "POST",
+      body,
+    );
+  }
+
+  async createManuscriptTag(data) {
+    return this.request("/manuscript_tag", "PUT", data);
+  }
+
+  async updateManuscriptTag(tagId, data) {
+    return this.request(`/manuscript_tag?id=${tagId}`, "PATCH", data);
+  }
+
+  async deleteManuscriptTag(tagId) {
+    return this.request(`/manuscript_tag?id=${tagId}`, "DELETE");
+  }
+
+  // ===== MANUSCRIPT STATS =====
+
+  async getManuscriptStat(statId) {
+    return this.request(`/manuscript_stat?id=${statId}&granularity=2`);
+  }
+
+  async listManuscriptStats(versionId, options = {}) {
+    const body = {
+      limit: options.limit !== undefined ? String(options.limit) : "50",
+      offset: options.offset !== undefined ? String(options.offset) : "0",
+    };
+    return this.request(
+      `/manuscript_version/manuscript_stats?id=${versionId}`,
+      "POST",
+      body,
+    );
+  }
+
+  async createManuscriptStat(data) {
+    return this.request("/manuscript_stat", "PUT", data);
+  }
+
+  async updateManuscriptStat(statId, data) {
+    return this.request(`/manuscript_stat?id=${statId}`, "PATCH", data);
+  }
+
+  async deleteManuscriptStat(statId) {
+    return this.request(`/manuscript_stat?id=${statId}`, "DELETE");
+  }
+
+  // ===== MANUSCRIPT LABELS =====
+
+  async getManuscriptLabel(labelId) {
+    return this.request(`/manuscript_label?id=${labelId}&granularity=2`);
+  }
+
+  async listManuscriptLabels(manuscriptId, options = {}) {
+    const body = {
+      limit: options.limit !== undefined ? String(options.limit) : "50",
+      offset: options.offset !== undefined ? String(options.offset) : "0",
+    };
+    return this.request(
+      `/manuscript/manuscript_labels?id=${manuscriptId}`,
+      "POST",
+      body,
+    );
+  }
+
+  async createManuscriptLabel(data) {
+    return this.request("/manuscript_label", "PUT", data);
+  }
+
+  async updateManuscriptLabel(labelId, data) {
+    return this.request(`/manuscript_label?id=${labelId}`, "PATCH", data);
+  }
+
+  async deleteManuscriptLabel(labelId) {
+    return this.request(`/manuscript_label?id=${labelId}`, "DELETE");
+  }
+
+  // ===== MANUSCRIPT PLOTS =====
+
+  async getManuscriptPlot(plotId) {
+    return this.request(`/manuscript_plot?id=${plotId}&granularity=2`);
+  }
+
+  async listManuscriptPlots(versionId, options = {}) {
+    const body = {
+      limit: options.limit !== undefined ? String(options.limit) : "50",
+      offset: options.offset !== undefined ? String(options.offset) : "0",
+    };
+    return this.request(
+      `/manuscript_version/manuscript_plots?id=${versionId}`,
+      "POST",
+      body,
+    );
+  }
+
+  async createManuscriptPlot(data) {
+    return this.request("/manuscript_plot", "PUT", data);
+  }
+
+  async updateManuscriptPlot(plotId, data) {
+    return this.request(`/manuscript_plot?id=${plotId}`, "PATCH", data);
+  }
+
+  async deleteManuscriptPlot(plotId) {
+    return this.request(`/manuscript_plot?id=${plotId}`, "DELETE");
+  }
 }

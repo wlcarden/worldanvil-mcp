@@ -812,6 +812,391 @@ export async function handleToolCall(name, args, client) {
       case "worldanvil_delete_variable":
         return jsonResponse(await client.deleteVariable(args.variable_id));
 
+      // ===== MAP LAYERS =====
+      case "worldanvil_get_layer":
+        return jsonResponse(await client.getLayer(args.layer_id));
+
+      case "worldanvil_list_layers":
+        return jsonResponse(
+          await client.listLayers(args.map_id, {
+            offset: args.offset,
+            limit: args.limit,
+          }),
+        );
+
+      case "worldanvil_create_layer":
+        return jsonResponse(
+          await client.createLayer({
+            title: args.title,
+            map: { id: args.map_id },
+          }),
+        );
+
+      case "worldanvil_update_layer": {
+        const data = {};
+        if (args.title !== undefined) data.title = args.title;
+        return jsonResponse(await client.updateLayer(args.layer_id, data));
+      }
+
+      case "worldanvil_delete_layer":
+        return jsonResponse(await client.deleteLayer(args.layer_id));
+
+      // ===== MARKER GROUPS =====
+      case "worldanvil_get_markergroup":
+        return jsonResponse(await client.getMarkerGroup(args.markergroup_id));
+
+      case "worldanvil_list_markergroups":
+        return jsonResponse(
+          await client.listMarkerGroups(args.map_id, {
+            offset: args.offset,
+            limit: args.limit,
+          }),
+        );
+
+      case "worldanvil_list_markers_in_group":
+        return jsonResponse(
+          await client.listMarkersInGroup(args.markergroup_id, {
+            offset: args.offset,
+            limit: args.limit,
+          }),
+        );
+
+      case "worldanvil_create_markergroup":
+        return jsonResponse(
+          await client.createMarkerGroup({
+            title: args.title,
+            map: { id: args.map_id },
+          }),
+        );
+
+      case "worldanvil_update_markergroup": {
+        const data = {};
+        if (args.title !== undefined) data.title = args.title;
+        return jsonResponse(
+          await client.updateMarkerGroup(args.markergroup_id, data),
+        );
+      }
+
+      case "worldanvil_delete_markergroup":
+        return jsonResponse(
+          await client.deleteMarkerGroup(args.markergroup_id),
+        );
+
+      // ===== MARKER TYPES =====
+      case "worldanvil_get_markertype":
+        return jsonResponse(await client.getMarkerType(args.markertype_id));
+
+      case "worldanvil_list_markertypes":
+        return jsonResponse(
+          await client.listMarkerTypes({
+            offset: args.offset,
+            limit: args.limit,
+          }),
+        );
+
+      case "worldanvil_create_markertype":
+        return jsonResponse(
+          await client.createMarkerType({ title: args.title }),
+        );
+
+      case "worldanvil_update_markertype": {
+        const data = {};
+        if (args.title !== undefined) data.title = args.title;
+        return jsonResponse(
+          await client.updateMarkerType(args.markertype_id, data),
+        );
+      }
+
+      case "worldanvil_delete_markertype":
+        return jsonResponse(await client.deleteMarkerType(args.markertype_id));
+
+      // ===== USERS =====
+      case "worldanvil_get_user":
+        return jsonResponse(await client.getUser(args.user_id));
+
+      case "worldanvil_update_user": {
+        const data = {};
+        if (args.title !== undefined) data.title = args.title;
+        return jsonResponse(await client.updateUser(args.user_id, data));
+      }
+
+      // ===== IMAGES (single resource) =====
+      case "worldanvil_get_image":
+        return jsonResponse(await client.getImage(args.image_id));
+
+      case "worldanvil_update_image": {
+        const data = {};
+        if (args.title !== undefined) data.title = args.title;
+        return jsonResponse(await client.updateImage(args.image_id, data));
+      }
+
+      case "worldanvil_delete_image":
+        return jsonResponse(await client.deleteImage(args.image_id));
+
+      // ===== MANUSCRIPT VERSIONS =====
+      case "worldanvil_get_manuscriptversion":
+        return jsonResponse(await client.getManuscriptVersion(args.version_id));
+
+      case "worldanvil_list_manuscriptversions":
+        return jsonResponse(
+          await client.listManuscriptVersions(args.manuscript_id, {
+            offset: args.offset,
+            limit: args.limit,
+          }),
+        );
+
+      case "worldanvil_create_manuscriptversion":
+        return jsonResponse(
+          await client.createManuscriptVersion({
+            title: args.title,
+            manuscript: { id: args.manuscript_id },
+          }),
+        );
+
+      case "worldanvil_update_manuscriptversion": {
+        const data = {};
+        if (args.title !== undefined) data.title = args.title;
+        return jsonResponse(
+          await client.updateManuscriptVersion(args.version_id, data),
+        );
+      }
+
+      case "worldanvil_delete_manuscriptversion":
+        return jsonResponse(
+          await client.deleteManuscriptVersion(args.version_id),
+        );
+
+      // ===== MANUSCRIPT PARTS =====
+      case "worldanvil_get_manuscriptpart":
+        return jsonResponse(await client.getManuscriptPart(args.part_id));
+
+      case "worldanvil_list_manuscriptparts":
+        return jsonResponse(
+          await client.listManuscriptParts(args.version_id, {
+            offset: args.offset,
+            limit: args.limit,
+          }),
+        );
+
+      case "worldanvil_create_manuscriptpart": {
+        const data = {
+          title: args.title,
+          manuscriptVersion: { id: args.version_id },
+        };
+        if (args.content !== undefined)
+          data.content = markdownToBBCode(args.content);
+        return jsonResponse(await client.createManuscriptPart(data));
+      }
+
+      case "worldanvil_update_manuscriptpart": {
+        const data = {};
+        if (args.title !== undefined) data.title = args.title;
+        if (args.content !== undefined)
+          data.content = markdownToBBCode(args.content);
+        return jsonResponse(
+          await client.updateManuscriptPart(args.part_id, data),
+        );
+      }
+
+      case "worldanvil_delete_manuscriptpart":
+        return jsonResponse(await client.deleteManuscriptPart(args.part_id));
+
+      // ===== MANUSCRIPT BEATS =====
+      case "worldanvil_get_manuscriptbeat":
+        return jsonResponse(await client.getManuscriptBeat(args.beat_id));
+
+      case "worldanvil_list_manuscriptbeats":
+        return jsonResponse(
+          await client.listManuscriptBeats(args.part_id, {
+            offset: args.offset,
+            limit: args.limit,
+          }),
+        );
+
+      case "worldanvil_create_manuscriptbeat": {
+        const data = {
+          title: args.title,
+          manuscriptPart: { id: args.part_id },
+        };
+        if (args.content !== undefined)
+          data.content = markdownToBBCode(args.content);
+        return jsonResponse(await client.createManuscriptBeat(data));
+      }
+
+      case "worldanvil_update_manuscriptbeat": {
+        const data = {};
+        if (args.title !== undefined) data.title = args.title;
+        if (args.content !== undefined)
+          data.content = markdownToBBCode(args.content);
+        return jsonResponse(
+          await client.updateManuscriptBeat(args.beat_id, data),
+        );
+      }
+
+      case "worldanvil_delete_manuscriptbeat":
+        return jsonResponse(await client.deleteManuscriptBeat(args.beat_id));
+
+      // ===== MANUSCRIPT BOOKMARKS =====
+      case "worldanvil_get_manuscriptbookmark":
+        return jsonResponse(
+          await client.getManuscriptBookmark(args.bookmark_id),
+        );
+
+      case "worldanvil_list_manuscriptbookmarks":
+        return jsonResponse(
+          await client.listManuscriptBookmarks(args.manuscript_id, {
+            offset: args.offset,
+            limit: args.limit,
+          }),
+        );
+
+      case "worldanvil_create_manuscriptbookmark":
+        return jsonResponse(
+          await client.createManuscriptBookmark({
+            title: args.title,
+            manuscript: { id: args.manuscript_id },
+          }),
+        );
+
+      case "worldanvil_update_manuscriptbookmark": {
+        const data = {};
+        if (args.title !== undefined) data.title = args.title;
+        return jsonResponse(
+          await client.updateManuscriptBookmark(args.bookmark_id, data),
+        );
+      }
+
+      case "worldanvil_delete_manuscriptbookmark":
+        return jsonResponse(
+          await client.deleteManuscriptBookmark(args.bookmark_id),
+        );
+
+      // ===== MANUSCRIPT TAGS =====
+      case "worldanvil_get_manuscripttag":
+        return jsonResponse(await client.getManuscriptTag(args.tag_id));
+
+      case "worldanvil_list_manuscripttags":
+        return jsonResponse(
+          await client.listManuscriptTags(args.manuscript_id, {
+            offset: args.offset,
+            limit: args.limit,
+          }),
+        );
+
+      case "worldanvil_create_manuscripttag":
+        return jsonResponse(
+          await client.createManuscriptTag({
+            title: args.title,
+            manuscript: { id: args.manuscript_id },
+          }),
+        );
+
+      case "worldanvil_update_manuscripttag": {
+        const data = {};
+        if (args.title !== undefined) data.title = args.title;
+        return jsonResponse(
+          await client.updateManuscriptTag(args.tag_id, data),
+        );
+      }
+
+      case "worldanvil_delete_manuscripttag":
+        return jsonResponse(await client.deleteManuscriptTag(args.tag_id));
+
+      // ===== MANUSCRIPT STATS =====
+      case "worldanvil_get_manuscriptstat":
+        return jsonResponse(await client.getManuscriptStat(args.stat_id));
+
+      case "worldanvil_list_manuscriptstats":
+        return jsonResponse(
+          await client.listManuscriptStats(args.version_id, {
+            offset: args.offset,
+            limit: args.limit,
+          }),
+        );
+
+      case "worldanvil_create_manuscriptstat":
+        return jsonResponse(
+          await client.createManuscriptStat({
+            title: args.title,
+            manuscriptVersion: { id: args.version_id },
+          }),
+        );
+
+      case "worldanvil_update_manuscriptstat": {
+        const data = {};
+        if (args.title !== undefined) data.title = args.title;
+        return jsonResponse(
+          await client.updateManuscriptStat(args.stat_id, data),
+        );
+      }
+
+      case "worldanvil_delete_manuscriptstat":
+        return jsonResponse(await client.deleteManuscriptStat(args.stat_id));
+
+      // ===== MANUSCRIPT LABELS =====
+      case "worldanvil_get_manuscriptlabel":
+        return jsonResponse(await client.getManuscriptLabel(args.label_id));
+
+      case "worldanvil_list_manuscriptlabels":
+        return jsonResponse(
+          await client.listManuscriptLabels(args.manuscript_id, {
+            offset: args.offset,
+            limit: args.limit,
+          }),
+        );
+
+      case "worldanvil_create_manuscriptlabel": {
+        const data = {
+          title: args.title,
+          manuscript: { id: args.manuscript_id },
+        };
+        if (args.color !== undefined) data.color = args.color;
+        return jsonResponse(await client.createManuscriptLabel(data));
+      }
+
+      case "worldanvil_update_manuscriptlabel": {
+        const data = {};
+        if (args.title !== undefined) data.title = args.title;
+        if (args.color !== undefined) data.color = args.color;
+        return jsonResponse(
+          await client.updateManuscriptLabel(args.label_id, data),
+        );
+      }
+
+      case "worldanvil_delete_manuscriptlabel":
+        return jsonResponse(await client.deleteManuscriptLabel(args.label_id));
+
+      // ===== MANUSCRIPT PLOTS =====
+      case "worldanvil_get_manuscriptplot":
+        return jsonResponse(await client.getManuscriptPlot(args.plot_id));
+
+      case "worldanvil_list_manuscriptplots":
+        return jsonResponse(
+          await client.listManuscriptPlots(args.version_id, {
+            offset: args.offset,
+            limit: args.limit,
+          }),
+        );
+
+      case "worldanvil_create_manuscriptplot":
+        return jsonResponse(
+          await client.createManuscriptPlot({
+            title: args.title,
+            manuscriptVersion: { id: args.version_id },
+          }),
+        );
+
+      case "worldanvil_update_manuscriptplot": {
+        const data = {};
+        if (args.title !== undefined) data.title = args.title;
+        return jsonResponse(
+          await client.updateManuscriptPlot(args.plot_id, data),
+        );
+      }
+
+      case "worldanvil_delete_manuscriptplot":
+        return jsonResponse(await client.deleteManuscriptPlot(args.plot_id));
+
       default:
         throw new Error(`Unknown tool: ${name}`);
     }

@@ -1680,5 +1680,835 @@ export function getToolDefinitions() {
         required: ["variable_id"],
       },
     },
+
+    // ===== MAP LAYERS =====
+    {
+      name: "worldanvil_get_layer",
+      description:
+        "Get a map layer by ID. Layers control visibility groupings on interactive maps (e.g., political borders, trade routes, terrain).",
+      inputSchema: {
+        type: "object",
+        properties: {
+          layer_id: { type: "string", description: "Map layer ID" },
+        },
+        required: ["layer_id"],
+      },
+    },
+    {
+      name: "worldanvil_list_layers",
+      description: "List all layers on a map",
+      inputSchema: {
+        type: "object",
+        properties: {
+          map_id: { type: "string", description: "Map ID" },
+          offset: { type: "number" },
+          limit: { type: "number" },
+        },
+        required: ["map_id"],
+      },
+    },
+    {
+      name: "worldanvil_create_layer",
+      description:
+        "Create a new layer on a map. Layers let you toggle visibility of different marker groups.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          title: { type: "string", description: "Layer name" },
+          map_id: {
+            type: "string",
+            description: "ID of the map this layer belongs to",
+          },
+        },
+        required: ["title", "map_id"],
+      },
+    },
+    {
+      name: "worldanvil_update_layer",
+      description: "Update a map layer",
+      inputSchema: {
+        type: "object",
+        properties: {
+          layer_id: { type: "string", description: "Layer ID" },
+          title: { type: "string", description: "New layer name" },
+        },
+        required: ["layer_id"],
+      },
+    },
+    {
+      name: "worldanvil_delete_layer",
+      description: "Delete a map layer",
+      inputSchema: {
+        type: "object",
+        properties: {
+          layer_id: { type: "string", description: "Layer ID to delete" },
+        },
+        required: ["layer_id"],
+      },
+    },
+
+    // ===== MARKER GROUPS =====
+    {
+      name: "worldanvil_get_markergroup",
+      description:
+        "Get a marker group by ID. Marker groups organize map markers into logical collections (e.g., cities, dungeons, points of interest).",
+      inputSchema: {
+        type: "object",
+        properties: {
+          markergroup_id: { type: "string", description: "Marker group ID" },
+        },
+        required: ["markergroup_id"],
+      },
+    },
+    {
+      name: "worldanvil_list_markergroups",
+      description: "List all marker groups on a map",
+      inputSchema: {
+        type: "object",
+        properties: {
+          map_id: { type: "string", description: "Map ID" },
+          offset: { type: "number" },
+          limit: { type: "number" },
+        },
+        required: ["map_id"],
+      },
+    },
+    {
+      name: "worldanvil_list_markers_in_group",
+      description: "List all markers within a specific marker group",
+      inputSchema: {
+        type: "object",
+        properties: {
+          markergroup_id: { type: "string", description: "Marker group ID" },
+          offset: { type: "number" },
+          limit: { type: "number" },
+        },
+        required: ["markergroup_id"],
+      },
+    },
+    {
+      name: "worldanvil_create_markergroup",
+      description: "Create a new marker group on a map",
+      inputSchema: {
+        type: "object",
+        properties: {
+          title: { type: "string", description: "Group name" },
+          map_id: {
+            type: "string",
+            description: "ID of the map this group belongs to",
+          },
+        },
+        required: ["title", "map_id"],
+      },
+    },
+    {
+      name: "worldanvil_update_markergroup",
+      description: "Update a marker group",
+      inputSchema: {
+        type: "object",
+        properties: {
+          markergroup_id: { type: "string", description: "Marker group ID" },
+          title: { type: "string", description: "New group name" },
+        },
+        required: ["markergroup_id"],
+      },
+    },
+    {
+      name: "worldanvil_delete_markergroup",
+      description: "Delete a marker group",
+      inputSchema: {
+        type: "object",
+        properties: {
+          markergroup_id: {
+            type: "string",
+            description: "Marker group ID to delete",
+          },
+        },
+        required: ["markergroup_id"],
+      },
+    },
+
+    // ===== MARKER TYPES =====
+    {
+      name: "worldanvil_get_markertype",
+      description:
+        "Get a marker type (pin style) by ID. Marker types define custom icons and styling for map markers.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          markertype_id: { type: "string", description: "Marker type ID" },
+        },
+        required: ["markertype_id"],
+      },
+    },
+    {
+      name: "worldanvil_list_markertypes",
+      description: "List all available marker types (pin styles)",
+      inputSchema: {
+        type: "object",
+        properties: {
+          offset: { type: "number" },
+          limit: { type: "number" },
+        },
+      },
+    },
+    {
+      name: "worldanvil_create_markertype",
+      description: "Create a new marker type (custom pin style) for maps",
+      inputSchema: {
+        type: "object",
+        properties: {
+          title: { type: "string", description: "Marker type name" },
+        },
+        required: ["title"],
+      },
+    },
+    {
+      name: "worldanvil_update_markertype",
+      description: "Update a marker type",
+      inputSchema: {
+        type: "object",
+        properties: {
+          markertype_id: { type: "string", description: "Marker type ID" },
+          title: { type: "string", description: "New name" },
+        },
+        required: ["markertype_id"],
+      },
+    },
+    {
+      name: "worldanvil_delete_markertype",
+      description: "Delete a marker type",
+      inputSchema: {
+        type: "object",
+        properties: {
+          markertype_id: {
+            type: "string",
+            description: "Marker type ID to delete",
+          },
+        },
+        required: ["markertype_id"],
+      },
+    },
+
+    // ===== USERS =====
+    {
+      name: "worldanvil_get_user",
+      description:
+        "Get a user profile by ID. Use get_identity to get the current user; this is for looking up other users (e.g., co-authors in collaborative worlds).",
+      inputSchema: {
+        type: "object",
+        properties: {
+          user_id: { type: "string", description: "User ID to look up" },
+        },
+        required: ["user_id"],
+      },
+    },
+    {
+      name: "worldanvil_update_user",
+      description: "Update the current user's profile",
+      inputSchema: {
+        type: "object",
+        properties: {
+          user_id: { type: "string", description: "User ID to update" },
+          title: { type: "string", description: "Display name" },
+        },
+        required: ["user_id"],
+      },
+    },
+
+    // ===== IMAGES (single resource) =====
+    {
+      name: "worldanvil_get_image",
+      description:
+        "Get a single image by ID with metadata (dimensions, URL, tags). Use list_images to find images first.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          image_id: { type: "string", description: "Image ID" },
+        },
+        required: ["image_id"],
+      },
+    },
+    {
+      name: "worldanvil_update_image",
+      description: "Update image metadata (title, tags, etc.)",
+      inputSchema: {
+        type: "object",
+        properties: {
+          image_id: { type: "string", description: "Image ID to update" },
+          title: { type: "string", description: "New image title" },
+        },
+        required: ["image_id"],
+      },
+    },
+    {
+      name: "worldanvil_delete_image",
+      description: "Delete an image from WorldAnvil",
+      inputSchema: {
+        type: "object",
+        properties: {
+          image_id: { type: "string", description: "Image ID to delete" },
+        },
+        required: ["image_id"],
+      },
+    },
+
+    // ===== MANUSCRIPT VERSIONS =====
+    {
+      name: "worldanvil_get_manuscriptversion",
+      description:
+        "Get a manuscript version (draft) by ID. Versions represent different drafts of a manuscript.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          version_id: { type: "string", description: "Manuscript version ID" },
+        },
+        required: ["version_id"],
+      },
+    },
+    {
+      name: "worldanvil_list_manuscriptversions",
+      description: "List all versions (drafts) of a manuscript",
+      inputSchema: {
+        type: "object",
+        properties: {
+          manuscript_id: { type: "string", description: "Manuscript ID" },
+          offset: { type: "number" },
+          limit: { type: "number" },
+        },
+        required: ["manuscript_id"],
+      },
+    },
+    {
+      name: "worldanvil_create_manuscriptversion",
+      description: "Create a new version (draft) of a manuscript",
+      inputSchema: {
+        type: "object",
+        properties: {
+          title: { type: "string", description: "Version/draft title" },
+          manuscript_id: {
+            type: "string",
+            description: "Parent manuscript ID",
+          },
+        },
+        required: ["title", "manuscript_id"],
+      },
+    },
+    {
+      name: "worldanvil_update_manuscriptversion",
+      description: "Update a manuscript version",
+      inputSchema: {
+        type: "object",
+        properties: {
+          version_id: { type: "string", description: "Version ID" },
+          title: { type: "string", description: "New title" },
+        },
+        required: ["version_id"],
+      },
+    },
+    {
+      name: "worldanvil_delete_manuscriptversion",
+      description: "Delete a manuscript version",
+      inputSchema: {
+        type: "object",
+        properties: {
+          version_id: { type: "string", description: "Version ID to delete" },
+        },
+        required: ["version_id"],
+      },
+    },
+
+    // ===== MANUSCRIPT PARTS =====
+    {
+      name: "worldanvil_get_manuscriptpart",
+      description:
+        "Get a manuscript part (chapter/section) by ID. Parts are the chapters or sections within a manuscript version.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          part_id: { type: "string", description: "Manuscript part ID" },
+        },
+        required: ["part_id"],
+      },
+    },
+    {
+      name: "worldanvil_list_manuscriptparts",
+      description: "List all parts (chapters/sections) in a manuscript version",
+      inputSchema: {
+        type: "object",
+        properties: {
+          version_id: {
+            type: "string",
+            description: "Manuscript version ID",
+          },
+          offset: { type: "number" },
+          limit: { type: "number" },
+        },
+        required: ["version_id"],
+      },
+    },
+    {
+      name: "worldanvil_create_manuscriptpart",
+      description:
+        "Create a new part (chapter/section) in a manuscript version. Content supports Markdown (auto-converted to BBCode).",
+      inputSchema: {
+        type: "object",
+        properties: {
+          title: { type: "string", description: "Chapter/section title" },
+          version_id: {
+            type: "string",
+            description: "Parent manuscript version ID",
+          },
+          content: {
+            type: "string",
+            description: "Chapter content (Markdown auto-converted to BBCode)",
+          },
+        },
+        required: ["title", "version_id"],
+      },
+    },
+    {
+      name: "worldanvil_update_manuscriptpart",
+      description: "Update a manuscript part (chapter/section)",
+      inputSchema: {
+        type: "object",
+        properties: {
+          part_id: { type: "string", description: "Part ID" },
+          title: { type: "string", description: "New title" },
+          content: {
+            type: "string",
+            description: "New content (Markdown auto-converted to BBCode)",
+          },
+        },
+        required: ["part_id"],
+      },
+    },
+    {
+      name: "worldanvil_delete_manuscriptpart",
+      description: "Delete a manuscript part",
+      inputSchema: {
+        type: "object",
+        properties: {
+          part_id: { type: "string", description: "Part ID to delete" },
+        },
+        required: ["part_id"],
+      },
+    },
+
+    // ===== MANUSCRIPT BEATS =====
+    {
+      name: "worldanvil_get_manuscriptbeat",
+      description:
+        "Get a manuscript beat by ID. Beats are scene-level story elements within a manuscript part (chapter).",
+      inputSchema: {
+        type: "object",
+        properties: {
+          beat_id: { type: "string", description: "Manuscript beat ID" },
+        },
+        required: ["beat_id"],
+      },
+    },
+    {
+      name: "worldanvil_list_manuscriptbeats",
+      description: "List all beats (scenes) in a manuscript part (chapter)",
+      inputSchema: {
+        type: "object",
+        properties: {
+          part_id: { type: "string", description: "Manuscript part ID" },
+          offset: { type: "number" },
+          limit: { type: "number" },
+        },
+        required: ["part_id"],
+      },
+    },
+    {
+      name: "worldanvil_create_manuscriptbeat",
+      description:
+        "Create a new beat (scene outline) in a manuscript part. Content supports Markdown.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          title: { type: "string", description: "Beat/scene title" },
+          part_id: {
+            type: "string",
+            description: "Parent manuscript part ID",
+          },
+          content: {
+            type: "string",
+            description: "Beat content (Markdown auto-converted to BBCode)",
+          },
+        },
+        required: ["title", "part_id"],
+      },
+    },
+    {
+      name: "worldanvil_update_manuscriptbeat",
+      description: "Update a manuscript beat",
+      inputSchema: {
+        type: "object",
+        properties: {
+          beat_id: { type: "string", description: "Beat ID" },
+          title: { type: "string", description: "New title" },
+          content: {
+            type: "string",
+            description: "New content (Markdown auto-converted to BBCode)",
+          },
+        },
+        required: ["beat_id"],
+      },
+    },
+    {
+      name: "worldanvil_delete_manuscriptbeat",
+      description: "Delete a manuscript beat",
+      inputSchema: {
+        type: "object",
+        properties: {
+          beat_id: { type: "string", description: "Beat ID to delete" },
+        },
+        required: ["beat_id"],
+      },
+    },
+
+    // ===== MANUSCRIPT BOOKMARKS =====
+    {
+      name: "worldanvil_get_manuscriptbookmark",
+      description:
+        "Get a manuscript bookmark by ID. Bookmarks are quick-access points within a manuscript.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          bookmark_id: {
+            type: "string",
+            description: "Manuscript bookmark ID",
+          },
+        },
+        required: ["bookmark_id"],
+      },
+    },
+    {
+      name: "worldanvil_list_manuscriptbookmarks",
+      description: "List all bookmarks in a manuscript",
+      inputSchema: {
+        type: "object",
+        properties: {
+          manuscript_id: { type: "string", description: "Manuscript ID" },
+          offset: { type: "number" },
+          limit: { type: "number" },
+        },
+        required: ["manuscript_id"],
+      },
+    },
+    {
+      name: "worldanvil_create_manuscriptbookmark",
+      description: "Create a new bookmark in a manuscript",
+      inputSchema: {
+        type: "object",
+        properties: {
+          title: { type: "string", description: "Bookmark title" },
+          manuscript_id: {
+            type: "string",
+            description: "Parent manuscript ID",
+          },
+        },
+        required: ["title", "manuscript_id"],
+      },
+    },
+    {
+      name: "worldanvil_update_manuscriptbookmark",
+      description: "Update a manuscript bookmark",
+      inputSchema: {
+        type: "object",
+        properties: {
+          bookmark_id: { type: "string", description: "Bookmark ID" },
+          title: { type: "string", description: "New title" },
+        },
+        required: ["bookmark_id"],
+      },
+    },
+    {
+      name: "worldanvil_delete_manuscriptbookmark",
+      description: "Delete a manuscript bookmark",
+      inputSchema: {
+        type: "object",
+        properties: {
+          bookmark_id: {
+            type: "string",
+            description: "Bookmark ID to delete",
+          },
+        },
+        required: ["bookmark_id"],
+      },
+    },
+
+    // ===== MANUSCRIPT TAGS =====
+    {
+      name: "worldanvil_get_manuscripttag",
+      description:
+        "Get a manuscript tag by ID. Tags categorize and organize content within manuscripts.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          tag_id: { type: "string", description: "Manuscript tag ID" },
+        },
+        required: ["tag_id"],
+      },
+    },
+    {
+      name: "worldanvil_list_manuscripttags",
+      description: "List all tags in a manuscript",
+      inputSchema: {
+        type: "object",
+        properties: {
+          manuscript_id: { type: "string", description: "Manuscript ID" },
+          offset: { type: "number" },
+          limit: { type: "number" },
+        },
+        required: ["manuscript_id"],
+      },
+    },
+    {
+      name: "worldanvil_create_manuscripttag",
+      description: "Create a new tag in a manuscript",
+      inputSchema: {
+        type: "object",
+        properties: {
+          title: { type: "string", description: "Tag name" },
+          manuscript_id: {
+            type: "string",
+            description: "Parent manuscript ID",
+          },
+        },
+        required: ["title", "manuscript_id"],
+      },
+    },
+    {
+      name: "worldanvil_update_manuscripttag",
+      description: "Update a manuscript tag",
+      inputSchema: {
+        type: "object",
+        properties: {
+          tag_id: { type: "string", description: "Tag ID" },
+          title: { type: "string", description: "New tag name" },
+        },
+        required: ["tag_id"],
+      },
+    },
+    {
+      name: "worldanvil_delete_manuscripttag",
+      description: "Delete a manuscript tag",
+      inputSchema: {
+        type: "object",
+        properties: {
+          tag_id: { type: "string", description: "Tag ID to delete" },
+        },
+        required: ["tag_id"],
+      },
+    },
+
+    // ===== MANUSCRIPT STATS =====
+    {
+      name: "worldanvil_get_manuscriptstat",
+      description:
+        "Get a manuscript stat by ID. Stats track word counts, progress, and other metrics for a manuscript version.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          stat_id: { type: "string", description: "Manuscript stat ID" },
+        },
+        required: ["stat_id"],
+      },
+    },
+    {
+      name: "worldanvil_list_manuscriptstats",
+      description: "List all stats for a manuscript version",
+      inputSchema: {
+        type: "object",
+        properties: {
+          version_id: {
+            type: "string",
+            description: "Manuscript version ID",
+          },
+          offset: { type: "number" },
+          limit: { type: "number" },
+        },
+        required: ["version_id"],
+      },
+    },
+    {
+      name: "worldanvil_create_manuscriptstat",
+      description: "Create a new stat entry for a manuscript version",
+      inputSchema: {
+        type: "object",
+        properties: {
+          title: { type: "string", description: "Stat name" },
+          version_id: {
+            type: "string",
+            description: "Parent manuscript version ID",
+          },
+        },
+        required: ["title", "version_id"],
+      },
+    },
+    {
+      name: "worldanvil_update_manuscriptstat",
+      description: "Update a manuscript stat",
+      inputSchema: {
+        type: "object",
+        properties: {
+          stat_id: { type: "string", description: "Stat ID" },
+          title: { type: "string", description: "New stat name" },
+        },
+        required: ["stat_id"],
+      },
+    },
+    {
+      name: "worldanvil_delete_manuscriptstat",
+      description: "Delete a manuscript stat",
+      inputSchema: {
+        type: "object",
+        properties: {
+          stat_id: { type: "string", description: "Stat ID to delete" },
+        },
+        required: ["stat_id"],
+      },
+    },
+
+    // ===== MANUSCRIPT LABELS =====
+    {
+      name: "worldanvil_get_manuscriptlabel",
+      description:
+        "Get a manuscript label by ID. Labels provide color-coded categorization for manuscript content.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          label_id: { type: "string", description: "Manuscript label ID" },
+        },
+        required: ["label_id"],
+      },
+    },
+    {
+      name: "worldanvil_list_manuscriptlabels",
+      description: "List all labels in a manuscript",
+      inputSchema: {
+        type: "object",
+        properties: {
+          manuscript_id: { type: "string", description: "Manuscript ID" },
+          offset: { type: "number" },
+          limit: { type: "number" },
+        },
+        required: ["manuscript_id"],
+      },
+    },
+    {
+      name: "worldanvil_create_manuscriptlabel",
+      description: "Create a new label in a manuscript",
+      inputSchema: {
+        type: "object",
+        properties: {
+          title: { type: "string", description: "Label name" },
+          manuscript_id: {
+            type: "string",
+            description: "Parent manuscript ID",
+          },
+          color: {
+            type: "string",
+            description: 'Label color (e.g., "#FF5733" or color name)',
+          },
+        },
+        required: ["title", "manuscript_id"],
+      },
+    },
+    {
+      name: "worldanvil_update_manuscriptlabel",
+      description: "Update a manuscript label",
+      inputSchema: {
+        type: "object",
+        properties: {
+          label_id: { type: "string", description: "Label ID" },
+          title: { type: "string", description: "New label name" },
+          color: { type: "string", description: "New label color" },
+        },
+        required: ["label_id"],
+      },
+    },
+    {
+      name: "worldanvil_delete_manuscriptlabel",
+      description: "Delete a manuscript label",
+      inputSchema: {
+        type: "object",
+        properties: {
+          label_id: { type: "string", description: "Label ID to delete" },
+        },
+        required: ["label_id"],
+      },
+    },
+
+    // ===== MANUSCRIPT PLOTS =====
+    {
+      name: "worldanvil_get_manuscriptplot",
+      description:
+        "Get a manuscript plot by ID. Plots track narrative threads across manuscript parts.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          plot_id: { type: "string", description: "Manuscript plot ID" },
+        },
+        required: ["plot_id"],
+      },
+    },
+    {
+      name: "worldanvil_list_manuscriptplots",
+      description: "List all plot threads in a manuscript version",
+      inputSchema: {
+        type: "object",
+        properties: {
+          version_id: {
+            type: "string",
+            description: "Manuscript version ID",
+          },
+          offset: { type: "number" },
+          limit: { type: "number" },
+        },
+        required: ["version_id"],
+      },
+    },
+    {
+      name: "worldanvil_create_manuscriptplot",
+      description: "Create a new plot thread in a manuscript version",
+      inputSchema: {
+        type: "object",
+        properties: {
+          title: { type: "string", description: "Plot thread name" },
+          version_id: {
+            type: "string",
+            description: "Parent manuscript version ID",
+          },
+        },
+        required: ["title", "version_id"],
+      },
+    },
+    {
+      name: "worldanvil_update_manuscriptplot",
+      description: "Update a manuscript plot thread",
+      inputSchema: {
+        type: "object",
+        properties: {
+          plot_id: { type: "string", description: "Plot ID" },
+          title: { type: "string", description: "New plot name" },
+        },
+        required: ["plot_id"],
+      },
+    },
+    {
+      name: "worldanvil_delete_manuscriptplot",
+      description: "Delete a manuscript plot thread",
+      inputSchema: {
+        type: "object",
+        properties: {
+          plot_id: { type: "string", description: "Plot ID to delete" },
+        },
+        required: ["plot_id"],
+      },
+    },
   ];
 }
