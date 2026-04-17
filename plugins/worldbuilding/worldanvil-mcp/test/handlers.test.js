@@ -105,10 +105,10 @@ describe("Category handlers", () => {
       );
 
       const [payload] = client.createCategory.mock.calls[0];
-      expect(payload.parentCategory).toEqual({ id: "cat-parent" });
+      expect(payload.parent).toEqual({ id: "cat-parent" });
     });
 
-    it("omits parentCategory when parent_category_id not provided", async () => {
+    it("omits parent when parent_category_id not provided", async () => {
       await handleToolCall(
         "worldanvil_create_category",
         {
@@ -119,7 +119,7 @@ describe("Category handlers", () => {
       );
 
       const [payload] = client.createCategory.mock.calls[0];
-      expect(payload.parentCategory).toBeUndefined();
+      expect(payload.parent).toBeUndefined();
     });
   });
 
@@ -136,7 +136,7 @@ describe("Category handlers", () => {
 
       expect(client.updateCategory).toHaveBeenCalledOnce();
       const [, payload] = client.updateCategory.mock.calls[0];
-      expect(payload.parentCategory).toEqual({ id: "cat-parent" });
+      expect(payload.parent).toEqual({ id: "cat-parent" });
     });
 
     it("sends only provided fields", async () => {
@@ -151,7 +151,7 @@ describe("Category handlers", () => {
 
       const [, payload] = client.updateCategory.mock.calls[0];
       expect(payload.title).toBe("Renamed");
-      expect(payload.parentCategory).toBeUndefined();
+      expect(payload.parent).toBeUndefined();
       expect(payload.icon).toBeUndefined();
     });
   });
