@@ -124,8 +124,10 @@ export async function handleToolCall(name, args, client) {
           world: { id: args.world_id },
         };
         if (args.icon !== undefined) data.icon = args.icon;
+        // Field name is `parent` per WA API GET response shape, not `parentCategory`.
+        // Discovered 2026-04-25 when category reparenting silently no-op'd.
         if (args.parent_category_id)
-          data.parentCategory = { id: args.parent_category_id };
+          data.parent = { id: args.parent_category_id };
         return jsonResponse(await client.createCategory(data));
       }
 
@@ -137,8 +139,10 @@ export async function handleToolCall(name, args, client) {
         if (args.content !== undefined)
           data.custom1 = markdownToBBCode(args.content);
         if (args.excerpt !== undefined) data.excerpt = args.excerpt;
+        // Field name is `parent` per WA API GET response shape, not `parentCategory`.
+        // Discovered 2026-04-25 when category reparenting silently no-op'd.
         if (args.parent_category_id)
-          data.parentCategory = { id: args.parent_category_id };
+          data.parent = { id: args.parent_category_id };
         return jsonResponse(
           await client.updateCategory(args.category_id, data),
         );
