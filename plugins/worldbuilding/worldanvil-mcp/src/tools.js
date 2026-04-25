@@ -267,6 +267,11 @@ export function getToolDefinitions() {
             description:
               'FontAwesome or RPG-Awesome icon class (e.g., "fa-solid fa-folder-tree", "fa-solid fa-users")',
           },
+          description: {
+            type: "string",
+            description:
+              "Legacy top-of-page intro/body (markdown auto-converted to BBCode). Renders above any custom1-5 column layout.",
+          },
           parent_category_id: {
             type: "string",
             description: "ID of the parent category for nesting (optional)",
@@ -298,7 +303,12 @@ export function getToolDefinitions() {
           content: {
             type: "string",
             description:
-              "The main content of the category page (markdown auto-converted to BBCode, stored in custom1)",
+              "Column-layout content for the category page (markdown auto-converted to BBCode, stored in custom1).",
+          },
+          description: {
+            type: "string",
+            description:
+              "Legacy top-of-page intro/body (markdown auto-converted to BBCode). Renders above any custom1-5 column layout. Pass an empty string to clear.",
           },
           excerpt: {
             type: "string",

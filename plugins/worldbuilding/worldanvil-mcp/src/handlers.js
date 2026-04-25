@@ -124,6 +124,8 @@ export async function handleToolCall(name, args, client) {
           world: { id: args.world_id },
         };
         if (args.icon !== undefined) data.icon = args.icon;
+        if (args.description !== undefined)
+          data.description = markdownToBBCode(args.description);
         // Field name is `parent` per WA API GET response shape, not `parentCategory`.
         // Discovered 2026-04-25 when category reparenting silently no-op'd.
         if (args.parent_category_id)
@@ -135,9 +137,13 @@ export async function handleToolCall(name, args, client) {
         const data = {};
         if (args.title !== undefined) data.title = args.title;
         if (args.icon !== undefined) data.icon = args.icon;
-        // Category content goes in custom1, not description (WorldAnvil quirk)
+        // Categories expose two body fields: `description` (legacy, top of page) and
+        // `custom1` (column layout). `content` writes custom1 for back-compat;
+        // `description` targets the legacy field directly. Pass empty string to clear.
         if (args.content !== undefined)
           data.custom1 = markdownToBBCode(args.content);
+        if (args.description !== undefined)
+          data.description = markdownToBBCode(args.description);
         if (args.excerpt !== undefined) data.excerpt = args.excerpt;
         // Field name is `parent` per WA API GET response shape, not `parentCategory`.
         // Discovered 2026-04-25 when category reparenting silently no-op'd.
