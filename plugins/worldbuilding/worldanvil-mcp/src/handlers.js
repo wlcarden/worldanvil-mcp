@@ -353,6 +353,16 @@ export async function handleToolCall(name, args, client) {
         if (args.label_type !== undefined) data.labelType = args.label_type;
         if (args.html_marker !== undefined) data.htmlMarker = args.html_marker;
         if (args.state !== undefined) data.state = args.state;
+        if (args.circle_radius !== undefined)
+          data.circleRadius = args.circle_radius;
+        if (args.color_outline !== undefined)
+          data.colorOutline = args.color_outline;
+        if (args.color_fill !== undefined) data.colorFill = args.color_fill;
+        if (args.opacity_outline !== undefined)
+          data.opacityOutline = args.opacity_outline;
+        if (args.opacity_fill !== undefined)
+          data.opacityFill = args.opacity_fill;
+        if (args.line_weight !== undefined) data.lineWeight = args.line_weight;
         return jsonResponse(await client.createMarker(data));
       }
 
@@ -368,6 +378,16 @@ export async function handleToolCall(name, args, client) {
         if (args.label_type !== undefined) data.labelType = args.label_type;
         if (args.html_marker !== undefined) data.htmlMarker = args.html_marker;
         if (args.state !== undefined) data.state = args.state;
+        if (args.circle_radius !== undefined)
+          data.circleRadius = args.circle_radius;
+        if (args.color_outline !== undefined)
+          data.colorOutline = args.color_outline;
+        if (args.color_fill !== undefined) data.colorFill = args.color_fill;
+        if (args.opacity_outline !== undefined)
+          data.opacityOutline = args.opacity_outline;
+        if (args.opacity_fill !== undefined)
+          data.opacityFill = args.opacity_fill;
+        if (args.line_weight !== undefined) data.lineWeight = args.line_weight;
         return jsonResponse(await client.updateMarker(args.marker_id, data));
       }
 
