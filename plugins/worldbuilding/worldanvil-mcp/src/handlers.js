@@ -509,6 +509,13 @@ export async function handleToolCall(name, args, client) {
           data.characters = args.character_ids.map((id) => ({ id }));
         if (args.organization_ids !== undefined)
           data.organizations = args.organization_ids.map((id) => ({ id }));
+        if (args.era_id !== undefined) data.era = { id: args.era_id };
+        if (args.timeline_ids !== undefined)
+          data.timelines = args.timeline_ids.map((id) => ({ id }));
+        if (args.category !== undefined) data.category = args.category;
+        if (args.lane !== undefined) data.lane = args.lane;
+        if (args.backgroundColour !== undefined)
+          data.backgroundColour = args.backgroundColour;
         return jsonResponse(await client.createHistory(data));
       }
 
@@ -547,6 +554,13 @@ export async function handleToolCall(name, args, client) {
           data.characters = args.character_ids.map((id) => ({ id }));
         if (args.organization_ids !== undefined)
           data.organizations = args.organization_ids.map((id) => ({ id }));
+        if (args.era_id !== undefined) data.era = { id: args.era_id };
+        if (args.timeline_ids !== undefined)
+          data.timelines = args.timeline_ids.map((id) => ({ id }));
+        if (args.category !== undefined) data.category = args.category;
+        if (args.lane !== undefined) data.lane = args.lane;
+        if (args.backgroundColour !== undefined)
+          data.backgroundColour = args.backgroundColour;
         return jsonResponse(await client.updateHistory(args.history_id, data));
       }
 
