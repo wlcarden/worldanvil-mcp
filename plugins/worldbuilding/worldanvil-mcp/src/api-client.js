@@ -511,6 +511,24 @@ export class WorldAnvilClient {
     return this.request(`/timeline?id=${timelineId}`, "DELETE");
   }
 
+  // ===== ERAS =====
+
+  async getEra(eraId) {
+    return this.request(`/era?id=${eraId}&granularity=2`);
+  }
+
+  async createEra(data) {
+    return this.request("/era", "PUT", data);
+  }
+
+  async updateEra(eraId, data) {
+    return this.request(`/era?id=${eraId}`, "PATCH", data);
+  }
+
+  async deleteEra(eraId) {
+    return this.request(`/era?id=${eraId}`, "DELETE");
+  }
+
   // ===== HISTORY EVENTS =====
 
   async getHistory(historyId) {

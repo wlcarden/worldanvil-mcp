@@ -883,6 +883,67 @@ export function getToolDefinitions() {
       },
     },
 
+    // ===== ERAS =====
+    {
+      name: "worldanvil_get_era",
+      description: "Get era by ID",
+      inputSchema: {
+        type: "object",
+        properties: { era_id: { type: "string", description: "Era ID" } },
+        required: ["era_id"],
+      },
+    },
+    {
+      name: "worldanvil_create_era",
+      description: "Create an era on a timeline",
+      inputSchema: {
+        type: "object",
+        properties: {
+          title: { type: "string", description: "Era title" },
+          timeline_id: { type: "string", description: "Parent timeline ID" },
+          world_id: {
+            type: "string",
+            description: "World ID (required by API)",
+          },
+          year: { type: "number", description: "Starting year of the era" },
+          ending_year: {
+            type: "number",
+            description: "Ending year of the era",
+          },
+          state: {
+            type: "string",
+            enum: ["public", "private"],
+            description: "Visibility state",
+          },
+        },
+        required: ["title", "timeline_id", "world_id"],
+      },
+    },
+    {
+      name: "worldanvil_update_era",
+      description: "Update an era",
+      inputSchema: {
+        type: "object",
+        properties: {
+          era_id: { type: "string" },
+          title: { type: "string" },
+          year: { type: "number" },
+          ending_year: { type: "number" },
+          state: { type: "string", enum: ["public", "private"] },
+        },
+        required: ["era_id"],
+      },
+    },
+    {
+      name: "worldanvil_delete_era",
+      description: "Delete an era",
+      inputSchema: {
+        type: "object",
+        properties: { era_id: { type: "string" } },
+        required: ["era_id"],
+      },
+    },
+
     // ===== HISTORY EVENTS =====
     {
       name: "worldanvil_get_history",

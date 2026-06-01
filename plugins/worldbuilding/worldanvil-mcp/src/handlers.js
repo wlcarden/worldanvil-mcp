@@ -432,6 +432,34 @@ export async function handleToolCall(name, args, client) {
       case "worldanvil_delete_timeline":
         return jsonResponse(await client.deleteTimeline(args.timeline_id));
 
+      // ===== ERAS =====
+      case "worldanvil_get_era":
+        return jsonResponse(await client.getEra(args.era_id));
+
+      case "worldanvil_create_era": {
+        const data = {
+          title: args.title,
+          timeline: { id: args.timeline_id },
+          world: { id: args.world_id },
+        };
+        if (args.year !== undefined) data.year = args.year;
+        if (args.ending_year !== undefined) data.endingYear = args.ending_year;
+        if (args.state !== undefined) data.state = args.state;
+        return jsonResponse(await client.createEra(data));
+      }
+
+      case "worldanvil_update_era": {
+        const data = {};
+        if (args.title !== undefined) data.title = args.title;
+        if (args.year !== undefined) data.year = args.year;
+        if (args.ending_year !== undefined) data.endingYear = args.ending_year;
+        if (args.state !== undefined) data.state = args.state;
+        return jsonResponse(await client.updateEra(args.era_id, data));
+      }
+
+      case "worldanvil_delete_era":
+        return jsonResponse(await client.deleteEra(args.era_id));
+
       // ===== HISTORY EVENTS =====
       case "worldanvil_get_history":
         return jsonResponse(await client.getHistory(args.history_id));
