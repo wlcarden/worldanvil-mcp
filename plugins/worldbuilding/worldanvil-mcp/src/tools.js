@@ -686,13 +686,44 @@ export function getToolDefinitions() {
         type: "object",
         properties: {
           title: { type: "string" },
-          map_id: { type: "string" },
+          map_id: { type: "string", description: "ID of the map" },
+          world_id: {
+            type: "string",
+            description: "ID of the world (required by API)",
+          },
+          geo_x: { type: "number", description: "X coordinate on the map" },
+          geo_y: { type: "number", description: "Y coordinate on the map" },
+          description: {
+            type: "string",
+            description: "Marker description (popup body)",
+          },
           article_id: {
             type: "string",
             description: "ID of the article to link to this marker (optional)",
           },
+          group_id: {
+            type: "string",
+            description: "MarkerGroup ID (optional)",
+          },
+          label_title: {
+            type: "string",
+            description: "Custom label title shown on the marker",
+          },
+          label_type: {
+            type: "string",
+            description: "Label rendering style (e.g. 'tooltip', 'always')",
+          },
+          html_marker: {
+            type: "string",
+            description: "Custom HTML for the marker pin (advanced)",
+          },
+          state: {
+            type: "string",
+            enum: ["public", "private"],
+            description: "Visibility state",
+          },
         },
-        required: ["title", "map_id"],
+        required: ["title", "map_id", "world_id"],
       },
     },
     {
@@ -703,10 +734,21 @@ export function getToolDefinitions() {
         properties: {
           marker_id: { type: "string" },
           title: { type: "string" },
+          geo_x: { type: "number" },
+          geo_y: { type: "number" },
+          description: { type: "string" },
           article_id: {
             type: "string",
             description: "ID of the article to link to this marker (optional)",
           },
+          group_id: {
+            type: "string",
+            description: "MarkerGroup ID (optional)",
+          },
+          label_title: { type: "string" },
+          label_type: { type: "string" },
+          html_marker: { type: "string" },
+          state: { type: "string", enum: ["public", "private"] },
         },
         required: ["marker_id"],
       },

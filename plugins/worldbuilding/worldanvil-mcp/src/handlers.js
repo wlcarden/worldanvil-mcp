@@ -339,15 +339,35 @@ export async function handleToolCall(name, args, client) {
         );
 
       case "worldanvil_create_marker": {
-        const data = { title: args.title, map: args.map_id };
-        if (args.article_id) data.article = { id: args.article_id };
+        const data = {
+          title: args.title,
+          map: { id: args.map_id },
+          world: { id: args.world_id },
+        };
+        if (args.geo_x !== undefined) data.geoX = args.geo_x;
+        if (args.geo_y !== undefined) data.geoY = args.geo_y;
+        if (args.description !== undefined) data.description = args.description;
+        if (args.article_id) data.targetArticle = { id: args.article_id };
+        if (args.group_id) data.group = { id: args.group_id };
+        if (args.label_title !== undefined) data.labelTitle = args.label_title;
+        if (args.label_type !== undefined) data.labelType = args.label_type;
+        if (args.html_marker !== undefined) data.htmlMarker = args.html_marker;
+        if (args.state !== undefined) data.state = args.state;
         return jsonResponse(await client.createMarker(data));
       }
 
       case "worldanvil_update_marker": {
         const data = {};
         if (args.title !== undefined) data.title = args.title;
-        if (args.article_id) data.article = { id: args.article_id };
+        if (args.geo_x !== undefined) data.geoX = args.geo_x;
+        if (args.geo_y !== undefined) data.geoY = args.geo_y;
+        if (args.description !== undefined) data.description = args.description;
+        if (args.article_id) data.targetArticle = { id: args.article_id };
+        if (args.group_id) data.group = { id: args.group_id };
+        if (args.label_title !== undefined) data.labelTitle = args.label_title;
+        if (args.label_type !== undefined) data.labelType = args.label_type;
+        if (args.html_marker !== undefined) data.htmlMarker = args.html_marker;
+        if (args.state !== undefined) data.state = args.state;
         return jsonResponse(await client.updateMarker(args.marker_id, data));
       }
 
