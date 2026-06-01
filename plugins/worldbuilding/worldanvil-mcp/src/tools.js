@@ -722,6 +722,30 @@ export function getToolDefinitions() {
             enum: ["public", "private"],
             description: "Visibility state",
           },
+          circle_radius: {
+            type: "number",
+            description: "Radius for circle-style markers (pixels)",
+          },
+          color_outline: {
+            type: "string",
+            description: "Outline color (hex, e.g. '#ff0000')",
+          },
+          color_fill: {
+            type: "string",
+            description: "Fill color (hex)",
+          },
+          opacity_outline: {
+            type: "number",
+            description: "Outline opacity 0.0-1.0",
+          },
+          opacity_fill: {
+            type: "number",
+            description: "Fill opacity 0.0-1.0",
+          },
+          line_weight: {
+            type: "number",
+            description: "Outline stroke weight (pixels)",
+          },
         },
         required: ["title", "map_id", "world_id"],
       },
@@ -749,6 +773,12 @@ export function getToolDefinitions() {
           label_type: { type: "string" },
           html_marker: { type: "string" },
           state: { type: "string", enum: ["public", "private"] },
+          circle_radius: { type: "number" },
+          color_outline: { type: "string" },
+          color_fill: { type: "string" },
+          opacity_outline: { type: "number" },
+          opacity_fill: { type: "number" },
+          line_weight: { type: "number" },
         },
         required: ["marker_id"],
       },
