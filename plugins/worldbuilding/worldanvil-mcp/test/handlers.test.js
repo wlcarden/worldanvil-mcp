@@ -105,10 +105,10 @@ describe("Category handlers", () => {
       );
 
       const [payload] = client.createCategory.mock.calls[0];
-      expect(payload.parentCategory).toEqual({ id: "cat-parent" });
+      expect(payload.parent).toEqual({ id: "cat-parent" });
     });
 
-    it("omits parentCategory when parent_category_id not provided", async () => {
+    it("omits parent when parent_category_id not provided", async () => {
       await handleToolCall(
         "worldanvil_create_category",
         {
@@ -119,7 +119,7 @@ describe("Category handlers", () => {
       );
 
       const [payload] = client.createCategory.mock.calls[0];
-      expect(payload.parentCategory).toBeUndefined();
+      expect(payload.parent).toBeUndefined();
     });
   });
 
@@ -136,7 +136,7 @@ describe("Category handlers", () => {
 
       expect(client.updateCategory).toHaveBeenCalledOnce();
       const [, payload] = client.updateCategory.mock.calls[0];
-      expect(payload.parentCategory).toEqual({ id: "cat-parent" });
+      expect(payload.parent).toEqual({ id: "cat-parent" });
     });
 
     it("sends only provided fields", async () => {
@@ -151,7 +151,7 @@ describe("Category handlers", () => {
 
       const [, payload] = client.updateCategory.mock.calls[0];
       expect(payload.title).toBe("Renamed");
-      expect(payload.parentCategory).toBeUndefined();
+      expect(payload.parent).toBeUndefined();
       expect(payload.icon).toBeUndefined();
     });
   });
@@ -414,6 +414,7 @@ describe("Marker handlers", () => {
         {
           title: "Dragon Lair",
           map_id: "map-1",
+          world_id: "world-1",
         },
         client,
       );
@@ -421,36 +422,42 @@ describe("Marker handlers", () => {
       expect(client.createMarker).toHaveBeenCalledOnce();
       const [payload] = client.createMarker.mock.calls[0];
       expect(payload.title).toBe("Dragon Lair");
-      expect(payload.map).toBe("map-1");
+      // WA API requires `map` and `world` as { id } references — sending
+      // them as bare strings (or omitting `world`) produces a 422.
+      expect(payload.map).toEqual({ id: "map-1" });
+      expect(payload.world).toEqual({ id: "world-1" });
     });
 
-    it("passes article_id as nested object", async () => {
+    it("passes article_id as nested targetArticle", async () => {
       await handleToolCall(
         "worldanvil_create_marker",
         {
           title: "Dragon Lair",
           map_id: "map-1",
+          world_id: "world-1",
           article_id: "art-dragon",
         },
         client,
       );
 
       const [payload] = client.createMarker.mock.calls[0];
-      expect(payload.article).toEqual({ id: "art-dragon" });
+      // The WA API field is `targetArticle`, not `article`.
+      expect(payload.targetArticle).toEqual({ id: "art-dragon" });
     });
 
-    it("omits article when article_id not provided", async () => {
+    it("omits targetArticle when article_id not provided", async () => {
       await handleToolCall(
         "worldanvil_create_marker",
         {
           title: "Unmarked Point",
           map_id: "map-1",
+          world_id: "world-1",
         },
         client,
       );
 
       const [payload] = client.createMarker.mock.calls[0];
-      expect(payload.article).toBeUndefined();
+      expect(payload.targetArticle).toBeUndefined();
     });
   });
 
@@ -468,10 +475,10 @@ describe("Marker handlers", () => {
       expect(client.updateMarker).toHaveBeenCalledOnce();
       const [, payload] = client.updateMarker.mock.calls[0];
       expect(payload.title).toBe("Renamed Marker");
-      expect(payload.article).toBeUndefined();
+      expect(payload.targetArticle).toBeUndefined();
     });
 
-    it("passes article_id as nested object", async () => {
+    it("passes article_id as nested targetArticle", async () => {
       await handleToolCall(
         "worldanvil_update_marker",
         {
@@ -482,7 +489,7 @@ describe("Marker handlers", () => {
       );
 
       const [, payload] = client.updateMarker.mock.calls[0];
-      expect(payload.article).toEqual({ id: "art-new" });
+      expect(payload.targetArticle).toEqual({ id: "art-new" });
     });
 
     it("sends empty payload when only marker_id given", async () => {

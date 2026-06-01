@@ -44,7 +44,7 @@ const GROUP_RESOURCES = {
     "markertype",
     "markertypes",
   ],
-  timeline: ["timeline", "timelines", "history", "histories"],
+  timeline: ["timeline", "timelines", "history", "histories", "era", "eras"],
   blocks: [
     "block",
     "blocks",
