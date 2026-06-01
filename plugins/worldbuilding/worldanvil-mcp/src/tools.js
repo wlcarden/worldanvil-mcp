@@ -1050,6 +1050,28 @@ export function getToolDefinitions() {
             items: { type: "string" },
             description: "IDs of linked organization articles",
           },
+          era_id: {
+            type: "string",
+            description: "ID of the era this event belongs to",
+          },
+          timeline_ids: {
+            type: "array",
+            items: { type: "string" },
+            description: "IDs of timelines to attach this event to directly",
+          },
+          category: {
+            type: "string",
+            description: "Category label for the event",
+          },
+          lane: {
+            type: "integer",
+            description: "Vertical lane position on timeline view",
+          },
+          backgroundColour: {
+            type: "string",
+            description:
+              "Background colour of the event bar (hex, e.g. '#ff0000')",
+          },
         },
         required: ["title", "world_id", "year"],
       },
@@ -1129,6 +1151,28 @@ export function getToolDefinitions() {
             type: "array",
             items: { type: "string" },
             description: "IDs of linked organization articles",
+          },
+          era_id: {
+            type: "string",
+            description: "ID of the era this event belongs to",
+          },
+          timeline_ids: {
+            type: "array",
+            items: { type: "string" },
+            description: "IDs of timelines to attach this event to directly",
+          },
+          category: {
+            type: "string",
+            description: "Category label for the event",
+          },
+          lane: {
+            type: "integer",
+            description: "Vertical lane position on timeline view",
+          },
+          backgroundColour: {
+            type: "string",
+            description:
+              "Background colour of the event bar (hex, e.g. '#ff0000')",
           },
         },
         required: ["history_id"],
